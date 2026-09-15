@@ -1,0 +1,17 @@
+# syntax=docker/dockerfile:1
+FROM python:3.12-slim
+
+WORKDIR /work
+COPY requirements.txt requirements-dev.txt ./
+
+# On a machine whose antivirus intercepts HTTPS, the runner passes that root CA as
+# the optional secret `extra_ca` (see scripts/export_local_ca.ps1). It is appended
+# to the system bundle for this one step only and never lands in a layer. In CI
+# the secret is absent and pip uses the default bundle.
+RUN --mount=type=secret,id=extra_ca,required=false \
+    if [ -s /run/secrets/extra_ca ]; then \
+      cat /etc/ssl/certs/ca-certificates.crt /run/secrets/extra_ca > /tmp/ca.pem; \
+      export PIP_CERT=/tmp/ca.pem; \
+    fi; \
+    pip install --no-cache-dir -r requirements-dev.txt; \
+    rm -f /tmp/ca.pem

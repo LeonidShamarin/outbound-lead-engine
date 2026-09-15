@@ -1,0 +1,21 @@
+.env
+.test-logs/
+# Local TLS-interception root CA for Docker builds (scripts/export_local_ca.ps1).
+.certs/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+.vscode/
+.idea/
+
+# Generated synthetic world; rebuild with `python -m leadengine generate`.
+data/
+
+# Claude Code & MCP local configuration
+.claude/
+.claude.json
+.claude.json.backup
+CLAUDE.local.md

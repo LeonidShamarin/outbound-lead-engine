@@ -1,0 +1,22 @@
+# Local development database. Capped, like everything on this machine.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: leadengine
+      POSTGRES_PASSWORD: leadengine
+      POSTGRES_DB: leadengine
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    mem_limit: 512m
+    memswap_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U leadengine"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  pgdata:
