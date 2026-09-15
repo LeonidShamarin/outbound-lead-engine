@@ -11,6 +11,9 @@ venv/
 .vscode/
 .idea/
 
+# Working notes, not part of the repository.
+docs/internal/
+
 # Generated synthetic world; rebuild with `python -m leadengine generate`.
 data/
 
