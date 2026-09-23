@@ -1,5 +1,8 @@
 # n8n workflows
 
+![daily cycle, executed](../docs/n8n-daily-cycle.jpg)
+![positive reply digest, executed](../docs/n8n-digest.jpg)
+
 Two workflows that drive the deployed app from n8n. Both were imported with the n8n
 CLI into a throwaway n8n 2.16.1 container and executed there against a local copy
 of the app (see "Verified" below).

@@ -51,6 +51,15 @@ Secrets live only in GitHub Actions secrets and Vercel environment variables:
 
 ## Stage 6: n8n workflows
 
+![n8n: the daily cycle signed and sent to /api/cycle, the server answers 20 emails and 24 events](docs/n8n-demo.gif)
+
+*Both workflows imported into a real n8n 2.16.1 and run from the editor, against a local
+copy of the app with a demo HMAC secret. The daily cycle: 20 emails written, 20 queued,
+24 signed events delivered, all answered 200. The digest, below, after 20 simulated days:
+2 positive replies posted to an incoming webhook.*
+
+![n8n: the positive reply digest](docs/n8n-digest.gif)
+
 [`n8n/daily-cycle.json`](n8n/daily-cycle.json) signs `{"copy_limit": 20}` with
 the Crypto node and POSTs it to `/api/cycle`; the HMAC secret sits in an encrypted
 n8n credential, never in the workflow JSON (n8n 2.x also blocks `$env` in
