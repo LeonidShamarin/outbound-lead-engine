@@ -38,6 +38,14 @@ def test_health_and_dashboard_without_a_database(client, monkeypatch) -> None:
     assert page.status_code == 503 and "not reachable" in page.text
 
 
+def test_link_preview_uses_absolute_urls_and_the_card_is_served(client) -> None:
+    page = client.get("/").text
+    assert '<meta property="og:image" content="https://outbound-lead-engine.vercel.app/og.png">' in page
+    card = client.get("/og.png")
+    assert card.status_code == 200 and card.headers["content-type"] == "image/png"
+    assert card.content[:8] == b"\x89PNG\r\n\x1a\n"
+
+
 def test_data_is_escaped_in_html(client, conn) -> None:
     conn.execute("INSERT INTO theories (name, hypothesis, status) VALUES ('<script>alert(1)</script>', 'h', 'draft')")
     conn.commit()

@@ -12,10 +12,11 @@ import json
 import os
 from collections.abc import Iterator
 from contextlib import contextmanager
+from pathlib import Path
 
 import psycopg
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 from leadengine.webhook import MAX_BODY_BYTES, handle
 
@@ -36,6 +37,15 @@ def _classifier():
     if not key:
         return keyword_classifier()
     return llm_classifier(GroqClient(key), os.environ.get("REPLY_MODEL", "openai/gpt-oss-20b"), [])
+
+
+PUBLIC_URL = os.environ.get("PUBLIC_URL", "https://outbound-lead-engine.vercel.app").rstrip("/")
+OG_IMAGE = Path(__file__).resolve().parents[2] / "static" / "og.png"
+
+
+@app.get("/og.png")
+def og_image() -> FileResponse:
+    return FileResponse(OG_IMAGE, media_type="image/png", headers={"Cache-Control": "public, max-age=86400"})
 
 
 @app.get("/health")
@@ -142,7 +152,7 @@ def dashboard() -> HTMLResponse:
             parts = {k: _rows(conn, q) for k, q in QUERIES.items()}
     except (psycopg.Error, KeyError) as e:
         note = f"<p class='muted'>The database is not reachable right now ({html.escape(type(e).__name__)}).</p>"
-        return HTMLResponse(PAGE.format(tiles="", body=note), status_code=503)
+        return HTMLResponse(PAGE.format(tiles="", body=note, public_url=PUBLIC_URL), status_code=503)
     fcols, frows = parts["funnel"]
     funnel = dict(zip(fcols, frows[0])) if frows else {}
     tiles = "".join(
@@ -164,13 +174,18 @@ def dashboard() -> HTMLResponse:
     ]
     body = "".join(f"<section><h2>{t}</h2><p class='muted'>{html.escape(d)}</p>{_table(*parts[k])}</section>"
                    for t, d, k in sections)
-    return HTMLResponse(PAGE.format(tiles=tiles, body=body))
+    return HTMLResponse(PAGE.format(tiles=tiles, body=body, public_url=PUBLIC_URL))
 
 
 PAGE = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Outbound Lead Engine</title>
 <meta name="description" content="Outbound lead pipeline on synthetic data: enrichment cascade, LLM emails, signed webhooks, kill switch.">
+<meta property="og:type" content="website"><meta property="og:title" content="Outbound Lead Engine">
+<meta property="og:description" content="Enrichment cascade, LLM-written emails, signed webhooks and a kill switch, on synthetic data, with measured numbers.">
+<meta property="og:url" content="{public_url}/"><meta property="og:image" content="{public_url}/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="{public_url}/og.png">
 <style>
 :root{{--bg:#f7f7f5;--fg:#1b1b1a;--muted:#6b6b66;--card:#fff;--line:#e4e4df;--accent:#2f6f4f}}
 @media (prefers-color-scheme:dark){{:root{{--bg:#141413;--fg:#ecece8;--muted:#9a9a93;--card:#1d1d1b;--line:#2e2e2b;--accent:#7cc39c}}}}
