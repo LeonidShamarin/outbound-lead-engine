@@ -1,4 +1,4 @@
-"""CLI: python -m leadengine {migrate|generate|seed|enrich}"""
+"""CLI: python -m leadengine {migrate|generate|seed|enrich|prepare|eval-replies|eval-scoring}"""
 
 from __future__ import annotations
 
@@ -39,6 +39,52 @@ def _enrich(args: argparse.Namespace) -> None:
           f"phantom empty runs {clients.phantom_empty_runs}, simulated waiting {sum(waited):.0f} s")
 
 
+def _groq(args: argparse.Namespace):
+    import os
+
+    from leadengine.llm import GroqClient, groq_key_from_file
+
+    key = os.environ.get("GROQ_API_KEY") or (groq_key_from_file(args.key_file) if args.key_file else None)
+    if not key:
+        raise SystemExit("set GROQ_API_KEY or pass --key-file")
+    return GroqClient(key)
+
+
+def _prepare(args: argparse.Namespace) -> None:
+    from leadengine.drafting import prepare
+    from leadengine.seed.theories import load_theories
+
+    llm = _groq(args) if (args.scoring == "llm" or args.copy_limit > 0) else None
+    with db.connect() as conn:
+        load_theories(conn)
+        s = prepare(conn, llm, scoring=args.scoring, score_model=args.score_model, copy_model=args.copy_model,
+                    copy_limit=args.copy_limit)
+        cost = conn.execute("SELECT step, count(*), sum(cost_usd)::float FROM llm_calls GROUP BY step").fetchall()
+        signal_cost = conn.execute("SELECT coalesce(sum(cost_usd), 0)::float FROM company_signals").fetchone()[0]
+    print(f"scoring: {s.score}")
+    print(f"signals fetched for {s.signals} companies (${signal_cost:.2f}); theories: {s.assign}")
+    print(f"copy: {s.copy}")
+    for step, n, usd in cost:
+        print(f"llm {step}: {n} requests, ${usd:.4f}")
+    if args.dump and args.copy_limit > 0:
+        from leadengine.evaluate import dump_copy
+
+        with db.connect() as conn:
+            print(json.dumps(dump_copy(conn, args.copy_model), indent=1))
+
+
+def _eval(args: argparse.Namespace) -> None:
+    from leadengine.evaluate import eval_replies, eval_scoring
+
+    llm = _groq(args)
+    if args.command == "eval-replies":
+        s = eval_replies(llm, args.model, pause_s=args.pause)
+    else:
+        world = json.loads(args.world.read_text(encoding="utf-8"))
+        s = eval_scoring(llm, args.model, world, n=args.n, pause_s=args.pause)
+    print(json.dumps(s, indent=1, ensure_ascii=False))
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="leadengine")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -63,6 +109,23 @@ def main(argv: list[str] | None = None) -> int:
     enr.add_argument("--phantom-empty", type=float, default=0.0, help="share of PhantomBuster runs that finish empty")
     enr.add_argument("--fault-seed", type=int, default=1)
 
+    prep = sub.add_parser("prepare", help="enriched leads -> scored -> theory -> copy_ready")
+    prep.add_argument("--scoring", choices=("rules", "llm"), default="rules")
+    prep.add_argument("--score-model", default="openai/gpt-oss-20b")
+    prep.add_argument("--copy-model", default="openai/gpt-oss-120b")
+    prep.add_argument("--copy-limit", type=int, default=0, help="how many emails to write (0 = stop before copy)")
+    prep.add_argument("--key-file")
+    prep.add_argument("--dump", action="store_true", help="write every email and generation stats to eval/results/")
+
+    for name, default_model in (("eval-replies", "openai/gpt-oss-20b"), ("eval-scoring", "openai/gpt-oss-20b")):
+        ev = sub.add_parser(name, help="run an eval against the real LLM and save results to eval/results/")
+        ev.add_argument("--model", default=default_model)
+        ev.add_argument("--key-file")
+        ev.add_argument("--pause", type=float, default=0.0, help="seconds between requests (free-tier rate limits)")
+        if name == "eval-scoring":
+            ev.add_argument("--world", type=Path, default=Path("data/world.json"))
+            ev.add_argument("--n", type=int, default=60)
+
     args = parser.parse_args(argv)
 
     if args.command == "migrate":
@@ -82,6 +145,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"intake rows {r.rows}: inserted {r.inserted}, duplicates {r.duplicates}, rejected {r.rejected}")
     elif args.command == "enrich":
         _enrich(args)
+    elif args.command == "prepare":
+        _prepare(args)
+    elif args.command in ("eval-replies", "eval-scoring"):
+        _eval(args)
     return 0
 
 

@@ -1,0 +1,507 @@
+{
+ "summary": {
+  "model": "openai/gpt-oss-120b",
+  "leads_attempted": 30,
+  "emails_stored": 30,
+  "dead_letter": 0,
+  "first_try_valid": 29,
+  "valid_after_repair": 1,
+  "rejected_answers": 1,
+  "request_errors": 0,
+  "requests": 31,
+  "prompt_tokens": 22035,
+  "completion_tokens": 13556,
+  "cost_usd": 0.011439,
+  "cost_per_1000_emails": 0.3813,
+  "avg_latency_ms": 1185,
+  "avg_words": 47.7,
+  "rejection_reasons": {
+   "body_b does not use any specific fact from the variables": 1
+  }
+ },
+ "emails": [
+  {
+   "lead": "423606db-40b4-4547-a003-e12205e570a8",
+   "first_name": "Jonas",
+   "title": "Head of Marketing",
+   "company": "AtlasWind",
+   "domain": "atlaswind-saas.example",
+   "theory": "fresh funding, hiring for pipeline",
+   "variables": {
+    "hiring_pace": "11 open sales and marketing roles posted in the 30 days before 2026-09-01",
+    "funding_round": "Series C, $18M, announced in July 2026"
+   },
+   "subject": "series c hiring push and attribution",
+   "body_a": "I saw AtlasWind posted 11 open sales and marketing roles in the last month after closing a $18M Series C in July.\n\nTallybird maps each channel to the pipeline those roles will eventually own, giving you attribution ready for the next board deck.\n\nWould it help to see how that could look for your upcoming hires?",
+   "body_b": "Curious how AtlasWind will prove pipeline impact from its new hires?\nYou announced an $18M Series C in July and posted 11 sales and marketing openings in the past 30 days.\nTallybird ties each channel to the pipeline those hires will generate, so you have clear attribution for the board.\nIs a quick look at that data useful for your next review?",
+   "words_a": 56,
+   "words_b": 62
+  },
+  {
+   "lead": "05149073-902a-4520-a8c7-a17c9148a330",
+   "first_name": "Lena",
+   "title": "Partnership Manager",
+   "company": "BrightForge",
+   "domain": "brightforge-edtech.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Warsaw in July 2026"
+   },
+   "subject": "your new Warsaw office pipeline?",
+   "body_a": "I saw BrightForge opened an office in Warsaw in July 2026.\n\nTallybird maps which channels generate pipeline in new regions, so you can attribute early wins to specific tactics.\n\nWould you find a quick look at Warsaw‑specific attribution useful?",
+   "body_b": "How are you tracking pipeline sources for the Warsaw launch?\n\nI noticed BrightForge opened an office in Warsaw in July 2026.\n\nCould a view of channel‑by‑region attribution help you demonstrate early regional performance?",
+   "words_a": 39,
+   "words_b": 33
+  },
+  {
+   "lead": "c05e6fc4-2d1c-43a7-a114-0e21923d5a4c",
+   "first_name": "Pieter",
+   "title": "SDR",
+   "company": "BrightForge",
+   "domain": "brightforge-edtech.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Warsaw in July 2026"
+   },
+   "subject": "new office in warsaw and pipeline",
+   "body_a": "I noticed BrightForge opened an office in Warsaw in July 2026. Tallybird attributes every inbound and outbound touch to the channel that generated the resulting pipeline, so you can see early numbers per region instantly. Would it be helpful to walk through how that view could support your SDR team’s reporting on the Warsaw launch?",
+   "body_b": "How are you attributing pipeline to channels for the new Warsaw office? I saw BrightForge opened an office in Warsaw in July 2026. Tallybird gives a real‑time breakdown of which campaigns and outreach methods are delivering pipeline in a brand‑new market. Curious if that insight would help your SDRs prove early regional performance?",
+   "words_a": 55,
+   "words_b": 53
+  },
+  {
+   "lead": "2d65068a-e2ec-46cb-9d5f-3886091a80b9",
+   "first_name": "Hugo",
+   "title": "Marketing Manager",
+   "company": "BrightStack",
+   "domain": "brightstack.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Toronto in March 2026"
+   },
+   "subject": "brightstack new toronto office launch",
+   "body_a": "I saw BrightStack opened an office in Toronto in March 2026.\n\nTallybird attributes pipeline to each channel, so you can see early numbers per region as the new office ramps up.\n\nWould it be useful to see how your Toronto launch is feeding the pipeline?",
+   "body_b": "How are you measuring regional pipeline now that BrightStack opened an office in Toronto in March 2026?\n\nTallybird surfaces channel‑by‑channel pipeline attribution, giving you clear visibility on new‑market performance.\n\nDo you think a quick look at your Toronto‑specific pipeline would help your reporting?",
+   "words_a": 45,
+   "words_b": 43
+  },
+  {
+   "lead": "3b343bdb-9360-42da-85bf-c86e1344b8d1",
+   "first_name": "Pieter",
+   "title": "Marketing Analyst",
+   "company": "BrightStack",
+   "domain": "brightstack.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Toronto in March 2026"
+   },
+   "subject": "brightstack's new toronto office pipeline?",
+   "body_a": "I saw BrightStack opened an office in Toronto in March 2026. Tallybird maps which channels generate pipeline in fresh markets, so you can attribute early revenue to the right tactics.\n\nWould you find it useful to see which campaigns are driving Toronto pipeline?",
+   "body_b": "Curious how your new Toronto office is filling its pipeline? I noticed BrightStack opened the Toronto office in March 2026. Tallybird provides channel‑level attribution for emerging regions, giving you clear insight into what’s delivering early numbers.\n\nDo you have a quick window to discuss channel attribution for that region?",
+   "words_a": 43,
+   "words_b": 49
+  },
+  {
+   "lead": "d974c291-1715-4550-9d7d-3cefdd06b9f8",
+   "first_name": "Pieter",
+   "title": "VP Growth",
+   "company": "BrightStack",
+   "domain": "brightstack.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Toronto in March 2026"
+   },
+   "subject": "brightstack's new toronto office?",
+   "body_a": "I saw BrightStack opened an office in Toronto in March 2026.\n\nTallybird maps which marketing and sales channels generate pipeline in new regions, giving growth leaders early, city‑level attribution.\n\nWould a quick rundown of how that could look for Toronto be helpful?",
+   "body_b": "How are you tracking pipeline sources for the Toronto launch?\n\nSince BrightStack opened its Toronto office in March 2026, Tallybird can attribute each new deal to the exact channel that drove it in that market.\n\nIs it worth a brief look at the data you could capture?",
+   "words_a": 42,
+   "words_b": 47
+  },
+  {
+   "lead": "4122afb9-0fe3-4801-81a9-36f58b7a543f",
+   "first_name": "Sofia",
+   "title": "Event Manager",
+   "company": "CedarLine",
+   "domain": "cedarline.example",
+   "theory": "new tool, broken attribution",
+   "variables": {
+    "tech_stack_change": "added HubSpot to its stack in May 2026"
+   },
+   "subject": "hubspot addition and pipeline attribution",
+   "body_a": "I saw CedarLine added HubSpot to its stack in May 2026. When a new CRM lands, the first metric that slips is clear channel‑to‑pipeline attribution. Tallybird maps each pipeline opportunity back to the exact channel that delivered it, even across tool migrations. Would you be open to a quick chat about how to keep attribution reliable during the transition?",
+   "body_b": "Are you noticing attribution drift since CedarLine added HubSpot in May 2026? New tools often scramble the link between marketing channels and pipeline revenue. Tallybird restores that link by attributing every deal to its originating channel, regardless of stack changes. Curious if a brief conversation could help you tighten visibility as you settle into the new setup?",
+   "words_a": 59,
+   "words_b": 57
+  },
+  {
+   "lead": "871c8587-55b1-44d2-84bc-b544fcd728a0",
+   "first_name": "Ben",
+   "title": "VP Sales",
+   "company": "CedarLine",
+   "domain": "cedarline.example",
+   "theory": "new tool, broken attribution",
+   "variables": {
+    "tech_stack_change": "added HubSpot to its stack in May 2026"
+   },
+   "subject": "hubspot addition and pipeline gaps?",
+   "body_a": "I saw CedarLine added HubSpot to its stack in May 2026.\n\nTallybird maps each inbound channel to the exact pipeline it generates, so you can see where the new HubSpot data is impacting revenue.\n\nWould you find a quick rundown of how that looks useful?",
+   "body_b": "Seeing many SaaS teams add HubSpot, they often wonder which channel fuels the new pipeline.\n\nCedarLine added HubSpot in May 2026, and Tallybird can attribute each channel’s contribution to the pipeline you’re now tracking.\n\nIs a brief look at that attribution helpful for your planning?",
+   "words_a": 45,
+   "words_b": 45
+  },
+  {
+   "lead": "e9839698-85eb-43bd-b144-f07009f3db9f",
+   "first_name": "Kateryna",
+   "title": "Partnership Manager",
+   "company": "CedarLine",
+   "domain": "cedarline.example",
+   "theory": "new tool, broken attribution",
+   "variables": {
+    "tech_stack_change": "added HubSpot to its stack in May 2026"
+   },
+   "subject": "hubspot addition and your pipeline view",
+   "body_a": "I saw CedarLine added HubSpot to its stack in May 2026.\n\nTallybird maps each channel to the pipeline that originates from it, so you can see exactly how the new tool is affecting revenue.\n\nWould you find a quick look at those attributions useful?",
+   "body_b": "Curious how HubSpot’s rollout is shaping your pipeline?\n\nCedarLine added HubSpot in May 2026, a change that often clouds channel attribution.\n\nTallybird surfaces the exact channel‑to‑pipeline links, clarifying the impact of new tools. Can I share a short example of what that looks like?",
+   "words_a": 44,
+   "words_b": 44
+  },
+  {
+   "lead": "2981738c-ba50-421f-90be-bc42cafeffc5",
+   "first_name": "Marta",
+   "title": "VP Growth",
+   "company": "HarborLine",
+   "domain": "harborline.example",
+   "theory": "fresh funding, hiring for pipeline",
+   "variables": {
+    "hiring_pace": "3 open sales and marketing roles posted in the 30 days before 2026-09-01",
+    "funding_round": "Series C, $35M, announced in March 2026"
+   },
+   "subject": "series c and 3 new hires?",
+   "body_a": "I saw HarborLine announced a Series C of $35M in March and posted three sales and marketing roles in the last month.\n\nTallybird maps each channel to the pipeline it generates, so you can show concrete attribution for the new hires at the next board meeting.\n\nWould it help to see how that could look for your upcoming review?",
+   "body_b": "Are you looking for channel‑level pipeline numbers to justify the three new sales and marketing hires after your $35M Series C in March?\n\nTallybird links every marketing and sales channel directly to the pipeline it produces, giving you board‑ready evidence.\n\nWould that be useful for your next growth review?",
+   "words_a": 59,
+   "words_b": 49
+  },
+  {
+   "lead": "4aa023c4-c1c5-4c11-a187-030c9a6be8f8",
+   "first_name": "Anna",
+   "title": "Head of Marketing",
+   "company": "HarborLine",
+   "domain": "harborline.example",
+   "theory": "fresh funding, hiring for pipeline",
+   "variables": {
+    "hiring_pace": "3 open sales and marketing roles posted in the 30 days before 2026-09-01",
+    "funding_round": "Series C, $35M, announced in March 2026"
+   },
+   "subject": "series c and your new hires",
+   "body_a": "I saw HarborLine posted 3 open sales and marketing roles in the last 30 days, right after your Series C announced in March 2026.\n\nTallybird maps which channels deliver pipeline, so you can show concrete attribution at the board meeting.\n\nWould you find it useful to see how your recent campaigns are contributing to pipeline?",
+   "body_b": "How are you planning to prove pipeline impact for the board after your recent Series C?\n\nHarborLine just posted 3 sales and marketing openings in the past month, a sign you’re scaling quickly. Tallybird tracks channel‑to‑pipeline attribution, giving you the numbers you’ll need for new hires and investors.\n\nCurious if that would help your upcoming board prep?",
+   "words_a": 55,
+   "words_b": 57
+  },
+  {
+   "lead": "0ac4bd87-7619-47c6-9ae6-a087037ba460",
+   "first_name": "Daniel",
+   "title": "Chief Revenue Officer",
+   "company": "MapleStack",
+   "domain": "maplestack-ecommerce.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Amsterdam in July 2026"
+   },
+   "subject": "new amsterdam office and early pipeline",
+   "body_a": "I saw MapleStack opened an office in Amsterdam in July 2026. Tallybird maps which channels generate pipeline in new regions, so you can attribute early revenue to specific tactics.\n\nWould a quick chat be useful to see how this could work for your Amsterdam launch?",
+   "body_b": "How are you tracking pipeline sources now that MapleStack opened an office in Amsterdam in July 2026? Tallybird provides a clear view of which channels are delivering pipeline in fresh markets.\n\nIs it worth exploring a simple attribution view for that market?",
+   "words_a": 45,
+   "words_b": 42
+  },
+  {
+   "lead": "be8de186-d225-4a43-b6be-b23020d19161",
+   "first_name": "Clara",
+   "title": "SDR",
+   "company": "MapleStack",
+   "domain": "maplestack-ecommerce.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Amsterdam in July 2026"
+   },
+   "subject": "amsterdam office and early pipeline",
+   "body_a": "I saw MapleStack opened an office in Amsterdam in July 2026.\n\nTallybird attributes every inbound channel to the pipeline you generate in a new region, giving you clear early numbers.\n\nWould you like to see how that data could shape your regional targets?",
+   "body_b": "How are you tracking pipeline from the new Amsterdam office?\n\nSince the office opened in July 2026, Tallybird can map each channel to the regional pipeline you’re building.\n\nCurious if that insight would help you report early results?",
+   "words_a": 43,
+   "words_b": 38
+  },
+  {
+   "lead": "11c290fb-b242-453d-8d56-e7b561f034f5",
+   "first_name": "Jonas",
+   "title": "Head of Growth",
+   "company": "NorthLine",
+   "domain": "northline-manufacturing.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Toronto in August 2026"
+   },
+   "subject": "northline's new toronto office launch",
+   "body_a": "I saw NorthLine opened an office in Toronto in August 2026, adding a fresh regional foothold. Tallybird maps which channels generate pipeline in new markets, letting growth teams surface early numbers per region without historical data. Would it be useful to see a quick view of how your Toronto outreach is performing?",
+   "body_b": "How are you measuring pipeline sources for the new Toronto office? With a brand‑new market, Tallybird attributes every inbound opportunity to its originating channel, giving you clear regional performance insight. Curious if a short snapshot would help you validate early regional numbers?",
+   "words_a": 52,
+   "words_b": 42
+  },
+  {
+   "lead": "2467f55e-470c-4f92-9b0a-21d652d0fe4f",
+   "first_name": "Mateo",
+   "title": "VP Growth",
+   "company": "NorthLine",
+   "domain": "northline-manufacturing.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Toronto in August 2026"
+   },
+   "subject": "northline's new toronto office pipeline?",
+   "body_a": "I saw NorthLine opened an office in Toronto in August 2026. Tallybird lets growth teams see exactly which channels generate pipeline in each region, so you can prove early numbers for the new market. Would you be open to a quick chat about how that could fit into your regional reporting?",
+   "body_b": "How are you tracking pipeline from the new Toronto office? I noticed NorthLine’s August 2026 launch in Toronto and thought about channel‑level attribution. Tallybird surfaces the source of each deal across regions, helping you surface early performance per market. Curious if that insight would be useful for your growth reporting?",
+   "words_a": 51,
+   "words_b": 50
+  },
+  {
+   "lead": "b3c40f58-3979-4167-9989-bc92505901ef",
+   "first_name": "Olena",
+   "title": "Head of Growth",
+   "company": "NorthLine",
+   "domain": "northline-manufacturing.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Toronto in August 2026"
+   },
+   "subject": "northline's new toronto office pipeline",
+   "body_a": "I saw NorthLine opened an office in Toronto in August 2026.\n\nTallybird maps which marketing channels generate pipeline in new regions, letting you attribute early deals to specific tactics.\n\nWould you find it useful to see how your Toronto outreach is performing?",
+   "body_b": "Curious how your new Toronto office is filling its pipeline?\n\nNorthLine opened that office in August 2026, and Tallybird can attribute each early deal to the channel that drove it.\n\nDoes a quick view of channel‑by‑channel results sound helpful?",
+   "words_a": 42,
+   "words_b": 39
+  },
+  {
+   "lead": "2ee7202d-cd14-4f82-8f92-e46e9044958d",
+   "first_name": "Eva",
+   "title": "VP Marketing",
+   "company": "NorthStack",
+   "domain": "northstack-saas.example",
+   "theory": "new tool, broken attribution",
+   "variables": {
+    "tech_stack_change": "added HubSpot to its stack in May 2026"
+   },
+   "subject": "hubspot addition and pipeline attribution?",
+   "body_a": "I saw NorthStack added HubSpot to its stack in May 2026. Tallybird maps each channel to the pipeline it generates, so you can see exactly which source drives revenue after the migration. Would you be open to sharing how you’re currently handling channel attribution?",
+   "body_b": "Seeing the HubSpot rollout, how are you tracking channel‑specific pipeline? I noticed NorthStack added HubSpot in May 2026, which often uncovers attribution gaps. Tallybird provides a clear view of which channels feed your pipeline, helping you set up the new measurement framework. Does that align with what you’re looking to solve?",
+   "words_a": 44,
+   "words_b": 51
+  },
+  {
+   "lead": "1dbb65fc-f7a3-4460-9b62-e4dd68302933",
+   "first_name": "Oskar",
+   "title": "VP Marketing",
+   "company": "PeakFlow",
+   "domain": "peakflow-fintech.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Toronto in July 2026"
+   },
+   "subject": "your new toronto office and pipeline?",
+   "body_a": "I saw PeakFlow opened an office in Toronto in July 2026. With a brand‑new market, tying inbound leads to the right channels per region becomes critical. Tallybird surfaces exactly which campaigns are delivering pipeline in each city, so you can prove early Toronto results to the board. Would it be useful to walk through a quick attribution snapshot for your Toronto launch?",
+   "body_b": "Curious how your Toronto launch is feeding pipeline across channels? Opening a new office in July 2026 means you need clear visibility on which tactics are delivering deals in that market. Tallybird maps channel‑to‑pipeline by region, giving you the data to validate early numbers for Toronto. Interested in a brief look at how that could work for PeakFlow?",
+   "words_a": 62,
+   "words_b": 58
+  },
+  {
+   "lead": "5cd1f06a-624d-4cd7-94bb-ea551fe91259",
+   "first_name": "Pieter",
+   "title": "Marketing Manager",
+   "company": "PeakFlow",
+   "domain": "peakflow-fintech.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Toronto in July 2026"
+   },
+   "subject": "peakflow's new toronto office pipeline?",
+   "body_a": "I saw PeakFlow opened an office in Toronto in July 2026. Tallybird can attribute each new lead in that region to the exact channel, giving your team early regional pipeline visibility.\n\nWould you find it useful to see how your Toronto outreach is performing today?",
+   "body_b": "How are you tracking channel performance for the new Toronto market?\n\nI noticed PeakFlow opened its Toronto office in July 2026, and Tallybird can map every inbound pipeline piece to its source, helping you prove early regional results.\n\nIs a quick look at your Toronto channel attribution something that would help your team?",
+   "words_a": 45,
+   "words_b": 53
+  },
+  {
+   "lead": "9d6ee9e9-b7d0-44b9-849e-1c8fa8ed8e86",
+   "first_name": "Marta",
+   "title": "Partnership Manager",
+   "company": "PeakFlow",
+   "domain": "peakflow-fintech.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Toronto in July 2026"
+   },
+   "subject": "PeakFlow's new toronto office and pipeline",
+   "body_a": "I saw PeakFlow opened an office in Toronto in July 2026.\n\nTallybird maps which channels generate pipeline in new regions, letting growth leaders attribute early numbers to specific tactics.\n\nWould you find it useful to see which campaigns are driving Toronto pipeline?",
+   "body_b": "Curious how your Toronto launch is feeding pipeline?\n\nYour July 2026 office opening in Toronto means you need early regional numbers, and Tallybird attributes pipeline to the exact channels that deliver it.\n\nDo you think a view of channel‑by‑channel Toronto pipeline would help your partnership strategy?",
+   "words_a": 42,
+   "words_b": 46
+  },
+  {
+   "lead": "b5e4b351-418b-4df1-b01b-74bef4e59268",
+   "first_name": "Daniel",
+   "title": "SDR",
+   "company": "QuietLoop",
+   "domain": "quietloop-logistics.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Toronto in August 2026"
+   },
+   "subject": "QuietLoop new Toronto office pipeline",
+   "body_a": "I saw QuietLoop opened an office in Toronto in August 2026.\n\nTallybird maps every inbound channel to the pipeline that originates in each region, giving you early numbers for the new market.\n\nWould a quick look at that data be helpful for your SDR team?",
+   "body_b": "How are you tracking pipeline from QuietLoop’s new Toronto office?\n\nThe office opened in August 2026, and Tallybird can attribute each regional lead to its source channel.\n\nIs seeing that attribution across channels something you’d find useful?",
+   "words_a": 45,
+   "words_b": 37
+  },
+  {
+   "lead": "0a397c0c-32c6-4272-a36b-9dc9ae5437ab",
+   "first_name": "Nadia",
+   "title": "Event Manager",
+   "company": "QuietLoop",
+   "domain": "quietloop-martech.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Austin in April 2026"
+   },
+   "subject": "quietloop's new austin office launch",
+   "body_a": "I saw QuietLoop opened an Austin office in April 2026, a clear signal you’re expanding into a fresh market. Tallybird maps which channels generate pipeline in new regions, so you can surface early numbers per city without historic data. Would it be useful to see how a channel‑level view could support your Austin rollout?",
+   "body_b": "How are you measuring which channels are feeding pipeline from the new Austin office? Tallybird attributes pipeline to the exact source, giving growth teams instant visibility in markets without prior history. Could a quick look at your current attribution setup help you prove early regional performance?",
+   "words_a": 54,
+   "words_b": 46
+  },
+  {
+   "lead": "3f5af35d-406a-4319-8706-2e6fc334ac21",
+   "first_name": "Pieter",
+   "title": "Director of Partnerships",
+   "company": "QuietLoop",
+   "domain": "quietloop-martech.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Austin in April 2026"
+   },
+   "subject": "quietloop's new austin office launch",
+   "body_a": "I saw QuietLoop opened an Austin office in April 2026, a clear signal you’re building a foothold in a new market. Tallybird maps which channels generate pipeline in each region, so you can surface early numbers for Austin without historic data. Would it be useful to see how this could fit into your regional reporting?",
+   "body_b": "How are you measuring pipeline sources for the new Austin office? With a fresh market, Tallybird attributes every inbound opportunity to the exact channel and region, giving you instant visibility into what’s working in Austin. Curious if that level of granularity would help your partnership team?",
+   "words_a": 55,
+   "words_b": 46
+  },
+  {
+   "lead": "6f266cf2-08c7-454e-9022-4a2b35b8773d",
+   "first_name": "Sofia",
+   "title": "Content Specialist",
+   "company": "RapidPay",
+   "domain": "rapidpay.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Amsterdam in July 2026"
+   },
+   "subject": "new amsterdam office and pipeline",
+   "body_a": "I saw RapidPay opened an office in Amsterdam in July 2026. Tallybird lets growth teams see exactly which channels generate pipeline in each region, so you can prove early numbers for a brand‑new market. Would it be useful to walk through a quick example of regional attribution?",
+   "body_b": "How are you attributing pipeline from the new Amsterdam office? I noticed the July 2026 launch and thought about the challenge of showing early regional results. Tallybird surfaces channel‑by‑channel pipeline by geography, giving you concrete data to report on the new market. Curious if a brief look at how it works would help your reporting?",
+   "words_a": 47,
+   "words_b": 55
+  },
+  {
+   "lead": "8452c42a-04b5-4469-a487-48ba50ada4b0",
+   "first_name": "Anna",
+   "title": "Event Manager",
+   "company": "RapidPay",
+   "domain": "rapidpay.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Amsterdam in July 2026"
+   },
+   "subject": "new amsterdam office pipeline?",
+   "body_a": "I saw RapidPay opened an office in Amsterdam in July 2026.\n\nTallybird maps which channels generate pipeline in new regions, so you can attribute early numbers by city.\n\nWould you like to see how that could work for your Amsterdam launch?",
+   "body_b": "How are you tracking pipeline from the Amsterdam office?\n\nRapidPay’s new Amsterdam office launched in July 2026, and Tallybird can attribute each channel’s contribution to that regional pipeline.\n\nCurious if a quick look would be useful for your team?",
+   "words_a": 41,
+   "words_b": 39
+  },
+  {
+   "lead": "dfbfbc86-72d1-433e-8288-1cd31fcf6c64",
+   "first_name": "Olena",
+   "title": "Marketing Manager",
+   "company": "RapidPay",
+   "domain": "rapidpay.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Amsterdam in July 2026"
+   },
+   "subject": "amsterdam office and early pipeline?",
+   "body_a": "I saw RapidPay opened an office in Amsterdam in July 2026, which means you’ll need clear early pipeline signals by region. Tallybird tags every inbound channel to the exact revenue opportunity, so you can see which tactics are delivering pipeline in a brand‑new market. Would it help to see a quick snapshot of how your Amsterdam effort is performing today?",
+   "body_b": "How are you currently attributing pipeline to channels in the new Amsterdam office? Tallybird surfaces channel‑by‑channel pipeline, giving growth teams instant visibility into which sources are moving deals forward in fresh markets. Could a brief look at your early Amsterdam data be useful?",
+   "words_a": 60,
+   "words_b": 43
+  },
+  {
+   "lead": "5bdbc9df-6783-4919-8c5e-9a3815e861e3",
+   "first_name": "Anna",
+   "title": "Partnership Manager",
+   "company": "RiverForge",
+   "domain": "riverforge-fintech.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Lisbon in August 2026"
+   },
+   "subject": "lisbon office and early pipeline",
+   "body_a": "I saw RiverForge opened an office in Lisbon in August 2026, a clear signal you’re building a foothold there. Tallybird maps which channels generate pipeline in each region, so you can prove early numbers to leadership. Would it be useful to see how your Lisbon‑based leads are attributed today?",
+   "body_b": "How are you measuring which channels are delivering pipeline from your new Lisbon office? Tallybird gives you city‑level attribution, turning fresh market activity into concrete growth metrics. Curious if a quick look at your Lisbon pipeline data would help your partnership goals?",
+   "words_a": 49,
+   "words_b": 42
+  },
+  {
+   "lead": "b8288322-ada2-4490-963d-76c705384436",
+   "first_name": "Oskar",
+   "title": "VP Marketing",
+   "company": "RiverForge",
+   "domain": "riverforge-fintech.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Lisbon in August 2026"
+   },
+   "subject": "lisbon office and early pipeline?",
+   "body_a": "I saw RiverForge opened an office in Lisbon in August 2026.\n\nTallybird maps which channels generate pipeline in new regions, so you can attribute early numbers by city.\n\nWould you find a quick rundown of channel‑level attribution for Lisbon useful?",
+   "body_b": "How are you tracking channel performance for the new Lisbon office?\n\nI noticed RiverForge opened that office in August 2026, and Tallybird attributes pipeline to each channel, giving you clear regional insights.\n\nIs seeing a snapshot of Lisbon‑specific attribution something you’d consider?",
+   "words_a": 40,
+   "words_b": 42
+  },
+  {
+   "lead": "c862ef15-6dfe-40c1-bf1c-992bb73668bd",
+   "first_name": "Mateo",
+   "title": "VP Sales",
+   "company": "RiverForge",
+   "domain": "riverforge-fintech.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Lisbon in August 2026"
+   },
+   "subject": "lisbon office and early pipeline?",
+   "body_a": "I saw RiverForge opened an office in Lisbon in August 2026.\n\nTallybird maps which channels generate pipeline in new regions, so you can attribute early numbers to the right sources.\n\nWould it help to see how that could work for your Lisbon launch?",
+   "body_b": "How are you tracking pipeline sources for the new Lisbon office?\n\nRiverForge opened its Lisbon office in August 2026.\n\nTallybird attributes pipeline to the exact channels that drive it in fresh markets. Curious if that insight would fit your regional reporting?",
+   "words_a": 43,
+   "words_b": 41
+  },
+  {
+   "lead": "d36147d4-c9c9-47c7-a412-124f7cc5b51e",
+   "first_name": "Pieter",
+   "title": "Marketing Analyst",
+   "company": "RiverForge",
+   "domain": "riverforge-fintech.example",
+   "theory": "new office, new market",
+   "variables": {
+    "company_news": "opened an office in Lisbon in August 2026"
+   },
+   "subject": "lisbon office and early pipeline",
+   "body_a": "I saw RiverForge opened an office in Lisbon in August 2026. That expansion creates a fresh pipeline that’s hard to attribute by channel. Tallybird maps every inbound touch to the exact source, letting you see which channels are delivering early deals in a new market. How are you currently measuring channel performance for Lisbon’s first quarter?",
+   "body_b": "How are you tracking which channels are feeding the new Lisbon pipeline? RiverForge’s Lisbon office opened in August 2026, so you’re likely building regional attribution from scratch. Tallybird provides real‑time channel‑to‑pipeline mapping, giving growth teams clear visibility on early numbers per region. Would a quick look at your current attribution setup be useful?",
+   "words_a": 56,
+   "words_b": 53
+  }
+ ]
+}

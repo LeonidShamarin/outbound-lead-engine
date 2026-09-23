@@ -31,6 +31,13 @@ def connect(url: str | None = None) -> psycopg.Connection:
     return psycopg.connect(url or database_url())
 
 
+def require_idle(conn: psycopg.Connection, who: str) -> None:
+    """Steps commit their own work in transaction() blocks, which inside an already
+    open transaction are only savepoints. Refuse instead of silently not committing."""
+    if conn.info.transaction_status != psycopg.pq.TransactionStatus.IDLE:
+        raise RuntimeError(f"{who}() needs an idle connection; commit or roll back first")
+
+
 def migration_files(directory: Path = MIGRATIONS_DIR) -> list[Path]:
     files = sorted(directory.glob("*.sql"))
     if len(files) > MAX_MIGRATIONS:

@@ -12,8 +12,117 @@ simulator. No real email is sent and no real person's data is processed. The
 LinkedIn Sales Navigator module from the original design stays documentation only:
 automating it breaks LinkedIn's terms and gets accounts banned.
 
-> Status: **stage 2 of 6** (schema, synthetic data, mock providers, enrichment
-> cascade). Scoring, sending, dashboard and deployment are next; see [Roadmap](#roadmap).
+> Status: **stage 3 of 6** (schema, synthetic data, mock providers, enrichment
+> cascade, scoring, theories, LLM-written emails, reply classification). Sending,
+> dashboard and deployment are next; see [Roadmap](#roadmap).
+
+## Stage 3: scoring, theories, emails, replies
+
+LLM: Groq, `openai/gpt-oss-120b` for emails and `openai/gpt-oss-20b` for replies,
+both with strict JSON schema output. Every answer is still validated in code,
+because a schema guarantees the shape, not the content. All numbers below come
+from real Groq runs; per-item results are in [`eval/results/`](eval/results).
+
+### Emails: 30 leads through the whole pipeline on Groq
+
+`python -m leadengine prepare --copy-limit 30 --dump` on the seed 42 world.
+
+| | |
+|---|---|
+| valid on the first answer | 29 of 30 |
+| valid after one repair | 1 (it used no fact from the lead's data) |
+| rejected for good | 0 |
+| average length | 48 words (limit 90) |
+| cost | $0.0114 for 30 emails with two variants each, **$0.38 per 1000** |
+| latency | 1.2 s per request |
+
+The validator carries over the design's rules (subject of 6 words or fewer and
+lowercase, body of 90 words or fewer and 3 paragraphs or fewer, ends with a
+question, no placeholders, no "I hope this finds you well", no links, A differs
+from B) and adds the one the design left to the prompt: **no invented facts**.
+Every number in an email must appear in the lead's own data, and "our customers"
+is rejected. The design's own sample email said "Three of our customers hired
+their VP DG with us", a claim a recipient can check. A rejected answer goes back
+to the model once with the reasons; after that the lead is retried on the next run
+and moved to `dead_letter` after 3 attempts.
+
+Read by eye, the emails are specific and factual. Two weaknesses the validator
+does not catch: an unverifiable generalisation without a number ("seeing many SaaS
+teams add HubSpot") passes, and almost every variant A opens with "I saw ...".
+
+### Scoring: an LLM against a rubric it was given
+
+The design scored every lead with an LLM. The rubric only uses fields that are
+already structured (seniority, industry, size band, country), so here it is
+computed in code, and the LLM scorer was measured against it on 60 leads with the
+rubric written into its prompt:
+
+| model | same score | within 1 | same send / don't send decision | cost per 1000 leads |
+|---|---|---|---|---|
+| `gpt-oss-20b` | 56.7% | 98.3% | 83.3% | $0.07 |
+| `gpt-oss-120b` | 68.3% | 100% | 83.3% | $0.14 |
+
+Nearly every disagreement is the model scoring one point lower: it uses the number
+of matching criteria as the score (2 matches, score 2) although the prompt says 2
+matches is 3. The smaller model also misread facts ("201-500" as not in the ICP,
+"1000+" as a negative signal). With either model, **1 lead in 6 would change
+between contacted and not contacted**. So scoring is code (`--scoring rules`, the
+default), the LLM scorer stays as an option, and a failed LLM call falls back to
+the rubric and is counted.
+
+### Reply classification: 40 labelled replies
+
+[`eval/replies.jsonl`](eval/replies.jsonl): six classes, including the design's
+subtle cases ("busy right now" is neutral, "not interested and stop emailing me" is
+unsubscribe, an out-of-office that names a colleague is not a referral).
+
+| | accuracy | cost per 1000 replies |
+|---|---|---|
+| keyword rules (baseline) | 70% (28 of 40) | 0 |
+| `gpt-oss-20b` | 100% (40 of 40) | $0.05 |
+| `gpt-oss-120b` | 100% (40 of 40) | $0.11 |
+
+The baseline fails on paraphrase: it misses 4 of 8 positive and 4 of 7 negative
+replies, the two classes that matter most. Two
+caveats about the 100%. The set was written by the same person as the prompt, so
+it is likely easier than real replies. And 40 of 40 still leaves the true error
+rate anywhere up to about 7%. A referral address must literally appear in the reply
+(checked in code); the model returned the right address in all 4 replies that had
+one, and null in the 2 that named a person without an address.
+
+The design's classifier also returned a self-reported confidence. It is gone: on
+an earlier project the model reported 1.00 on 36 of 40 answers, wrong ones
+included.
+
+### Where the money goes (seed 42, target 3)
+
+| step | leads in | leads out | cost |
+|---|---|---|---|
+| enrichment | 250 companies | 721 contacts, 578 verified | $36.98 |
+| scoring (rules) | 578 verified | 375 eligible, 203 below 3 | $0 |
+| signals (funding, hiring, tools, news) | 166 companies | | $49.80 |
+| theory assignment | 375 | 203 with a theory, 172 no theory fits | $0 |
+| email | 203 | | $0.08 at the measured rate |
+
+$0.43 per lead that reaches an email, and the email itself is 0.1% of that.
+**Signals cost more than finding the people**, and they are bought for every
+company with an eligible lead, although 172 of 375 leads then fit no theory.
+Fetching only the signal the cheapest fitting theory needs, one at a time, is the
+obvious next saving.
+
+### Design bugs fixed in this stage
+
+| in the design | here |
+|---|---|
+| scoring passed score 3, variable enrichment only took score 4, so every score-3 lead got a theory and waited forever | one threshold; a test takes a score-3 lead to `variables_ready` |
+| a theory was assigned before its variables were fetched; a company without a funding round left the lead stuck | a theory is assigned only if the company has every variable it needs, otherwise `cold_reserve` with the reason |
+| copy generation set status `generating_copy`, which the schema does not have | `drafting` |
+| the reply classifier returns `referral`, which `events.reply_class` rejected | allowed; tested |
+| theory assignment updated leads without a lock | `SKIP LOCKED` like every other step |
+| signals were fetched per lead and theory | once per company; a test checks 3 leads cost 1 lookup |
+
+Runs that die mid-step leave leads in `scoring` or `drafting`; the next run releases
+claims older than 15 minutes and counts that as an attempt.
 
 ## Stage 2: enrichment cascade
 
@@ -165,7 +274,14 @@ python -m leadengine migrate
 python -m leadengine generate
 python -m leadengine seed
 python -m leadengine enrich --target 3            # add --rate-429 0.1 etc. to inject faults
+python -m leadengine prepare --copy-limit 30 --dump   # needs GROQ_API_KEY
+python -m leadengine eval-replies                  # 40 labelled replies against the LLM
+python -m leadengine eval-scoring --n 60           # LLM score vs the rubric
 ```
+
+Live runs on this machine go through `.\scripts\run_live_capped.ps1 -WithDb -Command '...'`:
+the same memory cap as the tests, a throwaway Postgres, and the Groq key passed
+through the environment so it never appears on a command line.
 
 `enrich` runs the whole queue against the in-process mock providers. Retry and
 polling waits are added up instead of slept, and reported as simulated time.
@@ -178,7 +294,7 @@ are removed afterwards.
 .\scripts\run_tests_capped.ps1
 ```
 
-Current result: `76 passed`.
+Current result: `125 passed`.
 
 If an antivirus on your machine intercepts HTTPS (pip in the image fails with
 `CERTIFICATE_VERIFY_FAILED`), run `.\scripts\export_local_ca.ps1` once. It exports
@@ -190,7 +306,7 @@ not stored in the image.
 
 1. **Schema, migrations, synthetic data** (done)
 2. **Mock providers with real response shapes, 429s and pagination; the enrichment cascade** (done)
-3. Scoring, hypotheses and copy through an LLM with schema-validated output, fallbacks and an eval table
+3. **Scoring, theories and copy through an LLM with schema-validated output, fallbacks and evals** (done)
 4. Sending simulator, HMAC-signed event webhook with idempotency, Wilson-bound kill switch, dead letter
 5. Dashboard (Next.js) and deployment: Vercel, Neon, scheduled cycles in GitHub Actions
 6. n8n workflows orchestrating the same steps, demo recording

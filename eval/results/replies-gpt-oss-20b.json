@@ -1,0 +1,408 @@
+{
+ "summary": {
+  "model": "openai/gpt-oss-20b",
+  "n": 40,
+  "llm_accuracy": 1.0,
+  "keywords_accuracy": 0.7,
+  "llm_errors": 0,
+  "repaired": 0,
+  "requests": 40,
+  "cost_usd": 0.002061,
+  "avg_latency_ms": 338,
+  "per_class": {
+   "positive": {
+    "n": 8,
+    "llm_correct": 8,
+    "keywords_correct": 4
+   },
+   "negative": {
+    "n": 7,
+    "llm_correct": 7,
+    "keywords_correct": 3
+   },
+   "ooo": {
+    "n": 6,
+    "llm_correct": 6,
+    "keywords_correct": 5
+   },
+   "unsubscribe": {
+    "n": 6,
+    "llm_correct": 6,
+    "keywords_correct": 5
+   },
+   "referral": {
+    "n": 6,
+    "llm_correct": 6,
+    "keywords_correct": 4
+   },
+   "neutral": {
+    "n": 7,
+    "llm_correct": 7,
+    "keywords_correct": 7
+   }
+  },
+  "confusions": {}
+ },
+ "items": [
+  {
+   "id": 1,
+   "label": "positive",
+   "llm": "positive",
+   "keywords": "positive",
+   "referral_email": null,
+   "error": null,
+   "text": "Hi Mira, timing is actually good. We just started looking at attribution. Can you send over a short overview and pricing?"
+  },
+  {
+   "id": 2,
+   "label": "positive",
+   "llm": "positive",
+   "keywords": "positive",
+   "referral_email": null,
+   "error": null,
+   "text": "Interesting. How does this work with HubSpot? We moved to it in June and our channel reports are a mess."
+  },
+  {
+   "id": 3,
+   "label": "positive",
+   "llm": "positive",
+   "keywords": "positive",
+   "referral_email": null,
+   "error": null,
+   "text": "Sure, happy to talk. Thursday afternoon CET works for me."
+  },
+  {
+   "id": 4,
+   "label": "positive",
+   "llm": "positive",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "This is on my list for Q4. What would a pilot look like for a team of our size?"
+  },
+  {
+   "id": 5,
+   "label": "positive",
+   "llm": "positive",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "Ok you have my attention. Who else in fintech uses it?"
+  },
+  {
+   "id": 6,
+   "label": "positive",
+   "llm": "positive",
+   "keywords": "positive",
+   "referral_email": null,
+   "error": null,
+   "text": "Not this week, board prep. But yes, let's set up a call next week, I'd like to see it."
+  },
+  {
+   "id": 7,
+   "label": "positive",
+   "llm": "positive",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "Send me a deck and I'll share it with the team."
+  },
+  {
+   "id": 8,
+   "label": "positive",
+   "llm": "positive",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "We tried two tools for this and both failed. Curious what you do differently. Got 20 minutes on Monday?"
+  },
+  {
+   "id": 9,
+   "label": "negative",
+   "llm": "negative",
+   "keywords": "negative",
+   "referral_email": null,
+   "error": null,
+   "text": "Thanks, but we're not interested."
+  },
+  {
+   "id": 10,
+   "label": "negative",
+   "llm": "negative",
+   "keywords": "negative",
+   "referral_email": null,
+   "error": null,
+   "text": "We already use an in-house model for attribution and it works for us. Pass."
+  },
+  {
+   "id": 11,
+   "label": "negative",
+   "llm": "negative",
+   "keywords": "negative",
+   "referral_email": null,
+   "error": null,
+   "text": "No thanks. We just signed a 3-year contract with another vendor."
+  },
+  {
+   "id": 12,
+   "label": "negative",
+   "llm": "negative",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "Appreciate the note, but this isn't a fit for how we sell. We're mostly partner-led."
+  },
+  {
+   "id": 13,
+   "label": "negative",
+   "llm": "negative",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "Not something we'd buy. Budget for tooling is frozen and this isn't a priority."
+  },
+  {
+   "id": 14,
+   "label": "negative",
+   "llm": "negative",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "no"
+  },
+  {
+   "id": 15,
+   "label": "negative",
+   "llm": "negative",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "Hi, we evaluated this category last quarter and decided against it. Good luck."
+  },
+  {
+   "id": 16,
+   "label": "ooo",
+   "llm": "ooo",
+   "keywords": "ooo",
+   "referral_email": null,
+   "error": null,
+   "text": "I am out of the office until October 14 with limited access to email. I will reply when I'm back."
+  },
+  {
+   "id": 17,
+   "label": "ooo",
+   "llm": "ooo",
+   "keywords": "ooo",
+   "referral_email": null,
+   "error": null,
+   "text": "Thanks for your email. I'm on parental leave until January. For urgent matters please contact ops@quietfield.example."
+  },
+  {
+   "id": 18,
+   "label": "ooo",
+   "llm": "ooo",
+   "keywords": "ooo",
+   "referral_email": null,
+   "error": null,
+   "text": "Auto-reply: On vacation, back on Monday the 6th."
+  },
+  {
+   "id": 19,
+   "label": "ooo",
+   "llm": "ooo",
+   "keywords": "ooo",
+   "referral_email": null,
+   "error": null,
+   "text": "I'm travelling for a conference this week and will respond to emails after I return on the 28th."
+  },
+  {
+   "id": 20,
+   "label": "ooo",
+   "llm": "ooo",
+   "keywords": "ooo",
+   "referral_email": null,
+   "error": null,
+   "text": "Out of office. During my absence, Tom Hart (tom.hart@cedarflow.example) is covering marketing questions."
+  },
+  {
+   "id": 21,
+   "label": "ooo",
+   "llm": "ooo",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "Hello, I'm currently away and not checking email. Back 2 October."
+  },
+  {
+   "id": 22,
+   "label": "unsubscribe",
+   "llm": "unsubscribe",
+   "keywords": "unsubscribe",
+   "referral_email": null,
+   "error": null,
+   "text": "Please remove me from your list."
+  },
+  {
+   "id": 23,
+   "label": "unsubscribe",
+   "llm": "unsubscribe",
+   "keywords": "unsubscribe",
+   "referral_email": null,
+   "error": null,
+   "text": "Unsubscribe"
+  },
+  {
+   "id": 24,
+   "label": "unsubscribe",
+   "llm": "unsubscribe",
+   "keywords": "unsubscribe",
+   "referral_email": null,
+   "error": null,
+   "text": "Not interested and stop emailing me. This is the third one."
+  },
+  {
+   "id": 25,
+   "label": "unsubscribe",
+   "llm": "unsubscribe",
+   "keywords": "unsubscribe",
+   "referral_email": null,
+   "error": null,
+   "text": "Do not contact me again. How did you even get this address?"
+  },
+  {
+   "id": 26,
+   "label": "unsubscribe",
+   "llm": "unsubscribe",
+   "keywords": "unsubscribe",
+   "referral_email": null,
+   "error": null,
+   "text": "Take me off whatever sequence this is."
+  },
+  {
+   "id": 27,
+   "label": "unsubscribe",
+   "llm": "unsubscribe",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "I'd rather not get these emails. Please don't write again."
+  },
+  {
+   "id": 28,
+   "label": "referral",
+   "llm": "referral",
+   "keywords": "referral",
+   "referral_email": "olena.bondar@northwind.example",
+   "error": null,
+   "text": "I'm not the right person for this. Talk to Olena Bondar, she runs growth: olena.bondar@northwind.example"
+  },
+  {
+   "id": 29,
+   "label": "referral",
+   "llm": "referral",
+   "keywords": "referral",
+   "referral_email": null,
+   "error": null,
+   "text": "Forwarded your note to our Head of RevOps, Jonas. He'll reach out if relevant."
+  },
+  {
+   "id": 30,
+   "label": "referral",
+   "llm": "referral",
+   "keywords": "neutral",
+   "referral_email": "marta@riverlabs.example",
+   "error": null,
+   "text": "Attribution sits with marketing ops here. Try marta@riverlabs.example instead."
+  },
+  {
+   "id": 31,
+   "label": "referral",
+   "llm": "referral",
+   "keywords": "referral",
+   "referral_email": null,
+   "error": null,
+   "text": "Adding my colleague Pieter (cc'd) who owns our analytics stack. Pieter, over to you."
+  },
+  {
+   "id": 32,
+   "label": "referral",
+   "llm": "referral",
+   "keywords": "referral",
+   "referral_email": "hugo.reyes@atlasgrid.example",
+   "error": null,
+   "text": "Wrong team, sorry. Our demand gen lead is the one to ask, reach out to hugo.reyes@atlasgrid.example."
+  },
+  {
+   "id": 33,
+   "label": "referral",
+   "llm": "referral",
+   "keywords": "neutral",
+   "referral_email": "clara.meyer@bluestack.example",
+   "error": null,
+   "text": "I left the marketing team in August. Clara Meyer took over, you can find her at clara.meyer@bluestack.example."
+  },
+  {
+   "id": 34,
+   "label": "neutral",
+   "llm": "neutral",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "Sorry, busy right now."
+  },
+  {
+   "id": 35,
+   "label": "neutral",
+   "llm": "neutral",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "Maybe in 6 months, when we've finished the reorg."
+  },
+  {
+   "id": 36,
+   "label": "neutral",
+   "llm": "neutral",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "Thanks for reaching out."
+  },
+  {
+   "id": 37,
+   "label": "neutral",
+   "llm": "neutral",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "We received your message. A member of our team will get back to you within 2 business days. Ticket #48213."
+  },
+  {
+   "id": 38,
+   "label": "neutral",
+   "llm": "neutral",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "Got it, thanks."
+  },
+  {
+   "id": 39,
+   "label": "neutral",
+   "llm": "neutral",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "Let me think about it."
+  },
+  {
+   "id": 40,
+   "label": "neutral",
+   "llm": "neutral",
+   "keywords": "neutral",
+   "referral_email": null,
+   "error": null,
+   "text": "Can't commit to anything this quarter. Ping me again in the new year?"
+  }
+ ]
+}
