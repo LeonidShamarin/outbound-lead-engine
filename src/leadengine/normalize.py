@@ -44,3 +44,27 @@ def normalize_email(raw: str | None) -> str | None:
 
 def is_role_email(email: str) -> bool:
     return email.split("@", 1)[0] in ROLE_LOCAL_PARTS
+
+
+# Checked in order: "VP Marketing" must not fall through to the "marketing" manager rule.
+_SENIORITY_RULES = (
+    ("c_level", re.compile(r"\b(ceo|cmo|coo|cto|cfo|cro|chief|founder|co-founder|owner)\b")),
+    ("vp", re.compile(r"\b(vp|svp|evp|vice president)\b")),
+    ("director", re.compile(r"\b(director|head of|head)\b")),
+    ("manager", re.compile(r"\b(manager|lead)\b")),
+)
+
+
+def seniority_from_title(title: str | None) -> str | None:
+    """Map a free-text job title to the leads.seniority enum. None for no title.
+
+    Hunter, Snov and PhantomBuster return only a title; Apollo returns a seniority,
+    which its client maps directly.
+    """
+    if not title or not title.strip():
+        return None
+    t = title.lower()
+    for level, rule in _SENIORITY_RULES:
+        if rule.search(t):
+            return level
+    return "ic"

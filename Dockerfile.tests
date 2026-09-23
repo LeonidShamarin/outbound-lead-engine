@@ -8,7 +8,10 @@ COPY requirements.txt requirements-dev.txt ./
 # the optional secret `extra_ca` (see scripts/export_local_ca.ps1). It is appended
 # to the system bundle for this one step only and never lands in a layer. In CI
 # the secret is absent and pip uses the default bundle.
+# `set -e`: a failed pip install must fail the build. Without it the step's status
+# was that of the trailing `rm`, and a TLS error produced an image with no pytest.
 RUN --mount=type=secret,id=extra_ca,required=false \
+    set -e; \
     if [ -s /run/secrets/extra_ca ]; then \
       cat /etc/ssl/certs/ca-certificates.crt /run/secrets/extra_ca > /tmp/ca.pem; \
       export PIP_CERT=/tmp/ca.pem; \

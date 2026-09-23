@@ -24,17 +24,21 @@ $Root = Split-Path -Parent $PSScriptRoot
 $OutDir = Join-Path $Root '.certs'
 $Out = Join-Path $OutDir 'extra-ca.pem'
 
-$cert = Get-ChildItem Cert:\LocalMachine\Root, Cert:\CurrentUser\Root |
-    Where-Object { $_.Subject -like "*$SubjectMatch*" } |
-    Select-Object -First 1
+# All matches, not the first: Avast regenerates its root (seen 2026-09-23), the old
+# one stays in the store, and exporting only the stale one broke every build.
+$certs = @(Get-ChildItem Cert:\LocalMachine\Root, Cert:\CurrentUser\Root |
+    Where-Object { $_.Subject -like "*$SubjectMatch*" -and $_.NotAfter -gt (Get-Date) } |
+    Sort-Object Thumbprint -Unique)
 
-if (-not $cert) {
-    Write-Host "No root certificate matching '$SubjectMatch'; nothing to export." -ForegroundColor Yellow
+if ($certs.Count -eq 0) {
+    Write-Host "No valid root certificate matching '$SubjectMatch'; nothing to export." -ForegroundColor Yellow
     exit 0
 }
 
 New-Item -ItemType Directory -Force $OutDir | Out-Null
-$b64 = [Convert]::ToBase64String($cert.RawData, 'InsertLineBreaks').Replace("`r", '')
-$pem = "-----BEGIN CERTIFICATE-----`n" + $b64 + "`n-----END CERTIFICATE-----`n"
+$pem = ($certs | ForEach-Object {
+    $b64 = [Convert]::ToBase64String($_.RawData, 'InsertLineBreaks').Replace("`r", '')
+    "-----BEGIN CERTIFICATE-----`n" + $b64 + "`n-----END CERTIFICATE-----`n"
+}) -join ''
 [IO.File]::WriteAllText($Out, $pem, (New-Object Text.UTF8Encoding $false))
-Write-Host "exported $($cert.Subject) -> $Out"
+Write-Host "exported $($certs.Count) root(s) matching '$SubjectMatch' -> $Out"
