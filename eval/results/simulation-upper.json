@@ -67,6 +67,10 @@
    },
    "mistakes": [
     {
+     "intended": "ooo",
+     "got": "neutral"
+    },
+    {
      "intended": "referral",
      "got": "neutral"
     },
@@ -75,19 +79,15 @@
      "got": "neutral"
     },
     {
-     "intended": "ooo",
-     "got": "neutral"
-    },
-    {
-     "intended": "negative",
-     "got": "neutral"
-    },
-    {
      "intended": "negative",
      "got": "neutral"
     },
     {
      "intended": "positive",
+     "got": "neutral"
+    },
+    {
+     "intended": "negative",
      "got": "neutral"
     },
     {
@@ -112,7 +112,7 @@
   {
    "day": 0,
    "queued": 60,
-   "events": 68,
+   "events": 67,
    "rejected": 0,
    "duplicates": 0,
    "paused": [],
@@ -121,7 +121,7 @@
   {
    "day": 1,
    "queued": 60,
-   "events": 78,
+   "events": 81,
    "rejected": 0,
    "duplicates": 0,
    "paused": [],
@@ -130,7 +130,7 @@
   {
    "day": 2,
    "queued": 60,
-   "events": 94,
+   "events": 88,
    "rejected": 0,
    "duplicates": 0,
    "paused": [],
@@ -139,7 +139,7 @@
   {
    "day": 3,
    "queued": 23,
-   "events": 45,
+   "events": 50,
    "rejected": 0,
    "duplicates": 0,
    "paused": [],
@@ -148,7 +148,7 @@
   {
    "day": 4,
    "queued": 0,
-   "events": 18,
+   "events": 14,
    "rejected": 0,
    "duplicates": 0,
    "paused": [],
@@ -157,7 +157,7 @@
   {
    "day": 5,
    "queued": 0,
-   "events": 2,
+   "events": 6,
    "rejected": 0,
    "duplicates": 0,
    "paused": [],
@@ -175,7 +175,7 @@
   {
    "day": 7,
    "queued": 0,
-   "events": 1,
+   "events": 0,
    "rejected": 0,
    "duplicates": 0,
    "paused": [],

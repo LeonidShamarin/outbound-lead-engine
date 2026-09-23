@@ -12,10 +12,85 @@ simulator. No real email is sent and no real person's data is processed. The
 LinkedIn Sales Navigator module from the original design stays documentation only:
 automating it breaks LinkedIn's terms and gets accounts banned.
 
-> Status: **stage 4 of 6** (schema, synthetic data, mock providers, enrichment
-> cascade, scoring, theories, LLM-written emails, reply classification, sending
-> simulator, signed webhook, kill switch, theory generator). Dashboard and
-> deployment are next; see [Roadmap](#roadmap).
+**Live:** [outbound-lead-engine.vercel.app](https://outbound-lead-engine.vercel.app)
+(dashboard), fed once a day by a scheduled GitHub Actions run: new emails written by
+an LLM, the simulator's events delivered over HTTPS to the signed webhook, the kill
+switch applied. All six stages are done; see [Roadmap](#roadmap).
+
+![Dashboard after 20 simulated days](docs/dashboard.jpg)
+
+*The dashboard on a local copy after 20 simulated days (template emails, keyword
+reply classification). The live site shows the same views over its own, younger
+database.*
+
+## How it runs in production
+
+```
+GitHub Actions (daily cron)          n8n (optional, same thing)
+  python -m leadengine cycle           POST /api/cycle, HMAC-signed
+          │                                     │
+          └────────────► one simulated day ◄────┘
+                 score → signals → theory → email (Groq)
+                 queue within mailbox limits → simulator
+                 simulator events ──HTTPS, signed──► /api/events (Vercel)
+                 kill switch on the Wilson upper bound
+                              │
+                     Neon Postgres ◄──── dashboard, /api/summary
+```
+
+| piece | where | notes |
+|---|---|---|
+| app (dashboard, webhook, cycle trigger) | Vercel, Python 3.12, FastAPI | `app.py` → `src/leadengine/web.py`; `/health`, `/api/events`, `/api/cycle`, `/api/summary` |
+| database | Neon Postgres, `us-east-1`, next to Vercel's default region | migrations run by the scheduled job; the app uses the pooled URL |
+| schedule | GitHub Actions `daily cycle` | `bootstrap` (idempotent) then `cycle --llm --copy-limit 20` |
+| tests | GitHub Actions `tests` on every push | Postgres service container, memory-capped |
+| orchestration | [`n8n/`](n8n) | two workflows, verified in n8n 2.16.1 |
+
+Secrets live only in GitHub Actions secrets and Vercel environment variables:
+`DATABASE_URL`, `WEBHOOK_SECRET`, `GROQ_API_KEY`.
+
+## Stage 6: n8n workflows
+
+[`n8n/daily-cycle.json`](n8n/daily-cycle.json) signs `{"copy_limit": 20}` with
+the Crypto node and POSTs it to `/api/cycle`; the HMAC secret sits in an encrypted
+n8n credential, never in the workflow JSON (n8n 2.x also blocks `$env` in
+expressions by default). [`n8n/positive-digest.json`](n8n/positive-digest.json)
+reads `/api/summary` and posts the last two days of positive replies to a Slack or
+Discord incoming webhook, and sends nothing when there are none.
+
+Verified by `n8n import` + `n8n execute` in a throwaway, memory-capped n8n 2.16.1
+container against a local copy of the app: two cycles wrote 20 emails each and
+delivered 23 and 28 signed events, all answered 200; the digest posted the 2
+positive replies of a 20-day simulation and stayed silent on a database without
+any. Details and import steps: [`n8n/README.md`](n8n/README.md).
+
+A cycle can start from two places, so it takes a lease on a row before it runs; a
+second caller gets 409. A session advisory lock would not do: the app reaches Neon
+through a transaction-mode pooler, where a session lock and its unlock can land on
+different server connections.
+
+## Stage 5: dashboard and deployment
+
+The design's 12 Metabase cards became SQL views (`db/migrations/010_dashboard.sql`)
+read by the app. Three were not carried over: the two about the LinkedIn account
+pool (that module stays documentation) and "pipeline value", which needs an
+average deal size the data does not have.
+
+The first scheduled runs on the live stack: day 0 wrote 19 emails with Groq and
+delivered 24 events, day 1 wrote 20 and delivered 28; every event was answered 200.
+Of 20 leads on day 0, one email failed validation twice and went back to the queue,
+as designed.
+
+Things that broke on the way, all fixed:
+
+- Vercel reads `.env.example` at import and pre-filled `DATABASE_URL` with the
+  local `localhost:5433` value, so the first deploy answered 503 until it was
+  replaced.
+- Secrets piped into `gh secret set` from Windows PowerShell 5.1 got a UTF-8 BOM
+  in front (psycopg: `invalid connection option`, with an invisible U+FEFF before `postgresql://`). Redirecting the file
+  through `cmd` sends the bytes as they are.
+- The dashboard answered 500 when the database was unreachable; it now renders a
+  503 page and `/health` says `{"db": false}`.
 
 ## Stage 4: sending, events, and killing bad theories
 
@@ -385,7 +460,7 @@ are removed afterwards.
 .\scripts\run_tests_capped.ps1
 ```
 
-Current result: `147 passed`.
+Current result: `157 passed`.
 
 If an antivirus on your machine intercepts HTTPS (pip in the image fails with
 `CERTIFICATE_VERIFY_FAILED`), run `.\scripts\export_local_ca.ps1` once. It exports
@@ -399,5 +474,5 @@ not stored in the image.
 2. **Mock providers with real response shapes, 429s and pagination; the enrichment cascade** (done)
 3. **Scoring, theories and copy through an LLM with schema-validated output, fallbacks and evals** (done)
 4. **Sending simulator, HMAC-signed event webhook with idempotency, Wilson-bound kill switch, theory generator** (done)
-5. Dashboard (Next.js) and deployment: Vercel, Neon, scheduled cycles in GitHub Actions
-6. n8n workflows orchestrating the same steps, demo recording
+5. **Dashboard and deployment: Vercel, Neon, scheduled cycles in GitHub Actions** (done; the dashboard is FastAPI, not Next.js, because Vercel now runs a Python app as one function and mixing in Next.js needs a second build)
+6. **n8n workflows orchestrating the same steps** (done)
