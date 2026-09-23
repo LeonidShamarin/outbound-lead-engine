@@ -1,0 +1,108 @@
+{
+  "id": "oleDailyCycle01",
+  "name": "Outbound Lead Engine: daily cycle",
+  "active": false,
+  "settings": { "executionOrder": "v1", "timezone": "Europe/Kyiv" },
+  "nodes": [
+    {
+      "id": "b1f2a3c4-0001-4000-8000-000000000001",
+      "name": "Every day at 07:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": { "rule": { "interval": [{ "field": "days", "triggerAtHour": 7 }] } }
+    },
+    {
+      "id": "b1f2a3c4-0001-4000-8000-000000000002",
+      "name": "Run now",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 200],
+      "parameters": {}
+    },
+    {
+      "id": "b1f2a3c4-0001-4000-8000-000000000003",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [240, 100],
+      "notes": "Not secret. The HMAC secret lives in the 'Lead engine webhook secret' Crypto credential.",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "c1", "name": "base_url", "type": "string", "value": "https://outbound-lead-engine.vercel.app" },
+            { "id": "c2", "name": "copy_limit", "type": "number", "value": 20 }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "b1f2a3c4-0001-4000-8000-000000000004",
+      "name": "Build request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 100],
+      "notes": "The server checks the signature over the exact bytes, so the body is built once here and sent as raw text.",
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst t = Math.floor(Date.now() / 1000);\nconst body = JSON.stringify({ copy_limit: cfg.copy_limit });\nreturn [{ json: { url: cfg.base_url.replace(/\\/$/, '') + '/api/cycle', t, body, to_sign: `${t}.${body}` } }];"
+      }
+    },
+    {
+      "id": "b1f2a3c4-0001-4000-8000-000000000005",
+      "name": "Sign",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "position": [720, 100],
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "value": "={{ $json.to_sign }}",
+        "dataPropertyName": "signature",
+        "encoding": "hex"
+      },
+      "credentials": { "crypto": { "id": "oleHmacSecret01", "name": "Lead engine webhook secret" } }
+    },
+    {
+      "id": "b1f2a3c4-0001-4000-8000-000000000006",
+      "name": "POST /api/cycle",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 100],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "X-Signature", "value": "=t={{ $json.t }},v1={{ $json.signature }}" }] },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.body }}",
+        "options": {
+          "timeout": 290000,
+          "response": { "response": { "fullResponse": true, "neverError": true } }
+        }
+      }
+    },
+    {
+      "id": "b1f2a3c4-0001-4000-8000-000000000007",
+      "name": "Check result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 100],
+      "notes": "409 means GitHub Actions (or another run) is already doing today's cycle: not an error.",
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nif (r.statusCode === 409) {\n  return [{ json: { skipped: true, reason: 'another cycle is running' } }];\n}\nif (r.statusCode !== 200) {\n  throw new Error(`cycle failed: HTTP ${r.statusCode} ${JSON.stringify(r.body).slice(0, 300)}`);\n}\nconst failed = Object.entries(r.body.statuses || {}).filter(([code]) => code !== '200');\nif (failed.length) {\n  throw new Error(`events rejected by the webhook: ${JSON.stringify(Object.fromEntries(failed))}`);\n}\nreturn [{ json: r.body }];"
+      }
+    }
+  ],
+  "connections": {
+    "Every day at 07:00": { "main": [[{ "node": "Config", "type": "main", "index": 0 }]] },
+    "Run now": { "main": [[{ "node": "Config", "type": "main", "index": 0 }]] },
+    "Config": { "main": [[{ "node": "Build request", "type": "main", "index": 0 }]] },
+    "Build request": { "main": [[{ "node": "Sign", "type": "main", "index": 0 }]] },
+    "Sign": { "main": [[{ "node": "POST /api/cycle", "type": "main", "index": 0 }]] },
+    "POST /api/cycle": { "main": [[{ "node": "Check result", "type": "main", "index": 0 }]] }
+  },
+  "pinData": {}
+}

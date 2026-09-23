@@ -73,6 +73,34 @@ def test_webhook_over_http(client, conn) -> None:
     assert feed[0]["first_name"] == "Ann" and "pricing" in feed[0]["reply_text"]
 
 
+def test_cycle_endpoint_is_signed_and_refuses_to_run_twice(client, conn) -> None:
+    from leadengine.campaign import acquire_lease, release_lease
+
+    _queued(conn)
+    body = b'{"copy_limit": 0}'
+    assert client.post("/api/cycle", content=body).status_code == 401
+    r = client.post("/api/cycle", content=body, headers={"X-Signature": sign(SECRET, body)})
+    assert r.status_code == 200 and r.json()["day"] == 0
+    assert acquire_lease(conn, "someone-else")
+    busy = client.post("/api/cycle", content=body, headers={"X-Signature": sign(SECRET, body)})
+    assert busy.status_code == 409
+    release_lease(conn, "someone-else")
+    again = client.post("/api/cycle", content=body, headers={"X-Signature": sign(SECRET, body)})
+    assert again.status_code == 200 and again.json()["day"] == 1
+    bad = b"[1, 2]"
+    assert client.post("/api/cycle", content=bad, headers={"X-Signature": sign(SECRET, bad)}).status_code == 400
+
+
+def test_lease_expires_so_a_crashed_cycle_does_not_block_forever(conn) -> None:
+    from leadengine.campaign import acquire_lease
+
+    assert acquire_lease(conn, "crashed")
+    assert not acquire_lease(conn, "next")
+    conn.execute("UPDATE sim_state SET lease_until = now() - interval '1 minute'")
+    conn.commit()
+    assert acquire_lease(conn, "next")
+
+
 def test_oversized_body_is_refused_before_reading(client) -> None:
     r = client.post("/api/events", content=b"x" * (64 * 1024 + 1), headers={"X-Signature": "t=1,v1=0"})
     assert r.status_code == 413

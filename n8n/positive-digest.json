@@ -1,0 +1,88 @@
+{
+  "id": "olePositiveDigest01",
+  "name": "Outbound Lead Engine: positive reply digest",
+  "active": false,
+  "settings": { "executionOrder": "v1", "timezone": "Europe/Kyiv" },
+  "nodes": [
+    {
+      "id": "d1e2f3a4-0002-4000-8000-000000000001",
+      "name": "Every day at 09:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0],
+      "parameters": { "rule": { "interval": [{ "field": "days", "triggerAtHour": 9 }] } }
+    },
+    {
+      "id": "d1e2f3a4-0002-4000-8000-000000000002",
+      "name": "Run now",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 200],
+      "parameters": {}
+    },
+    {
+      "id": "d1e2f3a4-0002-4000-8000-000000000003",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [240, 100],
+      "notes": "notify_url: a Slack or Discord incoming webhook, or anything that accepts JSON. Treat it as a secret.",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "c1", "name": "base_url", "type": "string", "value": "https://outbound-lead-engine.vercel.app" },
+            { "id": "c2", "name": "notify_url", "type": "string", "value": "https://hooks.slack.com/services/REPLACE/ME" },
+            { "id": "c3", "name": "days", "type": "number", "value": 2 }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "d1e2f3a4-0002-4000-8000-000000000004",
+      "name": "GET /api/summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 100],
+      "parameters": {
+        "url": "={{ $json.base_url.replace(/\\/$/, '') }}/api/summary",
+        "options": { "timeout": 60000 }
+      }
+    },
+    {
+      "id": "d1e2f3a4-0002-4000-8000-000000000005",
+      "name": "Build digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 100],
+      "notes": "Returns nothing when there are no new positive replies, so no message is sent.",
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\nconst s = $input.first().json;\nconst since = new Date(Date.now() - cfg.days * 86400000).toISOString().slice(0, 10);\nconst fresh = (s.feed || []).filter(r => r.day >= since);\nif (!fresh.length) return [];\nconst f = (s.funnel || [])[0] || {};\nconst lines = fresh.map(r => `- ${r.first_name} (${r.title}, ${r.company}), theory \"${r.theory}\", variant ${r.variant}: ${String(r.reply_text).slice(0, 160)}`);\nconst theories = (s.theories || []).filter(t => t.status === 'active')\n  .map(t => `${t.name}: ${t.positive}/${t.sent} positive`).join('; ');\nconst text = [\n  `${fresh.length} positive repl${fresh.length === 1 ? 'y' : 'ies'} since ${since}`,\n  ...lines,\n  `Funnel: ${f.sent} sent, ${f.replied} replied, ${f.positive} positive. Active theories: ${theories}.`,\n  `${cfg.base_url}`,\n].join('\\n');\nreturn [{ json: { text, count: fresh.length, notify_url: cfg.notify_url } }];"
+      }
+    },
+    {
+      "id": "d1e2f3a4-0002-4000-8000-000000000006",
+      "name": "Send",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 100],
+      "notes": "Slack reads 'text', Discord reads 'content'; both are sent.",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.notify_url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: $json.text, content: $json.text }) }}",
+        "options": { "timeout": 30000 }
+      }
+    }
+  ],
+  "connections": {
+    "Every day at 09:00": { "main": [[{ "node": "Config", "type": "main", "index": 0 }]] },
+    "Run now": { "main": [[{ "node": "Config", "type": "main", "index": 0 }]] },
+    "Config": { "main": [[{ "node": "GET /api/summary", "type": "main", "index": 0 }]] },
+    "GET /api/summary": { "main": [[{ "node": "Build digest", "type": "main", "index": 0 }]] },
+    "Build digest": { "main": [[{ "node": "Send", "type": "main", "index": 0 }]] }
+  },
+  "pinData": {}
+}

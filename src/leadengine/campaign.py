@@ -58,6 +58,26 @@ class SimResult:
     paused_on_day: dict[str, int] = field(default_factory=dict)
 
 
+class CycleBusy(Exception):
+    """Another cycle holds the lease."""
+
+
+def acquire_lease(conn: psycopg.Connection, holder: str, minutes: int = 15) -> bool:
+    with conn.transaction():
+        conn.execute("INSERT INTO sim_state (id) VALUES (1) ON CONFLICT DO NOTHING")
+        got = conn.execute(
+            """UPDATE sim_state SET lease_until = now() + make_interval(mins => %s), lease_holder = %s
+                WHERE id = 1 AND (lease_until IS NULL OR lease_until < now()) RETURNING 1""",
+            (minutes, holder)).fetchone()
+    return got is not None
+
+
+def release_lease(conn: psycopg.Connection, holder: str) -> None:
+    with conn.transaction():
+        conn.execute("UPDATE sim_state SET lease_until = NULL, lease_holder = NULL WHERE id = 1 AND lease_holder = %s",
+                     (holder,))
+
+
 @dataclass
 class CycleResult:
     day: int
@@ -78,6 +98,22 @@ def run_scheduled_day(conn: psycopg.Connection, *, secret: str, classify: Classi
     `secret`; otherwise straight into `webhook.handle`. Outbox rows are deleted only
     after the run, so a crash re-delivers them next time and the event ids dedupe.
     """
+    import uuid
+
+    holder = uuid.uuid4().hex[:12]
+    if not acquire_lease(conn, holder):
+        raise CycleBusy("another cycle is running")
+    try:
+        return _scheduled_day(conn, secret=secret, classify=classify, writer=writer, writer_model=writer_model,
+                              copy_limit=copy_limit, webhook_url=webhook_url, rule=rule, mailboxes=mailboxes,
+                              daily_limit=daily_limit, post=post, now=now)
+    finally:
+        release_lease(conn, holder)
+
+
+def _scheduled_day(conn: psycopg.Connection, *, secret: str, classify: Classifier, writer: LLMClient,
+                   writer_model: str, copy_limit: int, webhook_url: str | None, rule: Rule, mailboxes: int,
+                   daily_limit: int, post: Callable[..., object] | None, now: datetime | None) -> CycleResult:
     from leadengine.drafting import prepare
     from leadengine.seed.theories import load_theories
 

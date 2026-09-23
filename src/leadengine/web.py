@@ -8,6 +8,7 @@ views the README numbers come from. Everything shown is synthetic.
 from __future__ import annotations
 
 import html
+import json
 import os
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -57,6 +58,40 @@ async def events(request: Request) -> JSONResponse:
         status, out = handle(conn, os.environ.get("WEBHOOK_SECRET", ""), request.headers.get("x-signature"),
                              body, _classifier())
     return JSONResponse(out, status_code=status)
+
+
+@app.post("/api/cycle")
+async def cycle(request: Request) -> JSONResponse:
+    """Run one scheduled day. Signed like the webhook (same secret, same header), so
+    an orchestrator such as n8n can trigger it without a second credential."""
+    from leadengine.campaign import CycleBusy, run_scheduled_day
+    from leadengine.copywriter import TemplateWriter
+    from leadengine.llm import GroqClient
+    from leadengine.webhook import WebhookRejected, verify
+
+    body = await request.body()
+    secret = os.environ.get("WEBHOOK_SECRET", "")
+    try:
+        verify(secret, request.headers.get("x-signature"), body)
+    except WebhookRejected as e:
+        return JSONResponse({"error": e.reason}, status_code=e.status)
+    try:
+        opts = json.loads(body or b"{}")
+        copy_limit = max(0, min(int(opts.get("copy_limit", 20)), 50))
+    except (ValueError, TypeError, AttributeError):
+        return JSONResponse({"error": "body must be JSON like {\"copy_limit\": 20}"}, status_code=400)
+    key = os.environ.get("GROQ_API_KEY")
+    writer, model = (GroqClient(key), "openai/gpt-oss-120b") if key else (TemplateWriter(), "template")
+    try:
+        with _db() as conn:
+            conn.autocommit = False
+            r = run_scheduled_day(conn, secret=secret, classify=_classifier(), writer=writer, writer_model=model,
+                                  copy_limit=copy_limit)
+            conn.commit()
+    except CycleBusy:
+        return JSONResponse({"error": "another cycle is running"}, status_code=409)
+    return JSONResponse({"day": r.day, "drafted": r.drafted, "queued": r.queued, "delivered": r.delivered,
+                         "statuses": {str(k): v for k, v in r.statuses.items()}, "paused": r.paused})
 
 
 QUERIES = {
