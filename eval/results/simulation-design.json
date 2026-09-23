@@ -1,0 +1,350 @@
+{
+ "summary": {
+  "rule": "design: lower bound < 0.5% at n >= 300",
+  "days": 30,
+  "drafted_before": 1381,
+  "sent_total": 730,
+  "webhooks": 1123,
+  "webhook_rejections": 0,
+  "duplicates": 0,
+  "theories": [
+   {
+    "theory": "fresh funding, hiring for pipeline",
+    "status": "active",
+    "true_positive_rate": 0.03,
+    "sent": 102,
+    "replied": 7,
+    "positive": 4,
+    "bounced": 3,
+    "unsubscribed": 0,
+    "observed_rate": 0.0392,
+    "wilson": [
+     0.0154,
+     0.0965
+    ],
+    "paused_on_day": null
+   },
+   {
+    "theory": "new office, new market",
+    "status": "paused",
+    "true_positive_rate": 0.003,
+    "sent": 321,
+    "replied": 15,
+    "positive": 1,
+    "bounced": 4,
+    "unsubscribed": 2,
+    "observed_rate": 0.0031,
+    "wilson": [
+     0.0006,
+     0.0174
+    ],
+    "paused_on_day": 8
+   },
+   {
+    "theory": "new tool, broken attribution",
+    "status": "paused",
+    "true_positive_rate": 0.012,
+    "sent": 307,
+    "replied": 13,
+    "positive": 2,
+    "bounced": 4,
+    "unsubscribed": 0,
+    "observed_rate": 0.0065,
+    "wilson": [
+     0.0018,
+     0.0234
+    ],
+    "paused_on_day": 11
+   }
+  ],
+  "classifier": {
+   "mode": "llm",
+   "replies": 54,
+   "agree_with_simulator": 54,
+   "accuracy": 1.0,
+   "how": {
+    "llm": 54
+   },
+   "mistakes": [],
+   "llm_cost_usd": 0.00272
+  },
+  "proposed_theories": [],
+  "theory_llm_cost_usd": 0
+ },
+ "days": [
+  {
+   "day": 0,
+   "queued": 60,
+   "events": 71,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 1,
+   "queued": 60,
+   "events": 78,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 2,
+   "queued": 60,
+   "events": 83,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 3,
+   "queued": 60,
+   "events": 90,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 4,
+   "queued": 60,
+   "events": 91,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 5,
+   "queued": 60,
+   "events": 90,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 6,
+   "queued": 60,
+   "events": 86,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 7,
+   "queued": 60,
+   "events": 108,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 8,
+   "queued": 60,
+   "events": 99,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [
+    "new office, new market"
+   ],
+   "released": 625
+  },
+  {
+   "day": 9,
+   "queued": 60,
+   "events": 94,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 10,
+   "queued": 60,
+   "events": 89,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 11,
+   "queued": 60,
+   "events": 90,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [
+    "new tool, broken attribution"
+   ],
+   "released": 511
+  },
+  {
+   "day": 12,
+   "queued": 10,
+   "events": 33,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 13,
+   "queued": 0,
+   "events": 14,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 14,
+   "queued": 0,
+   "events": 3,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 15,
+   "queued": 0,
+   "events": 4,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 16,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 17,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 18,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 19,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 20,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 21,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 22,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 23,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 24,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 25,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 26,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 27,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 28,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 29,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  }
+ ]
+}

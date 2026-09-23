@@ -1,0 +1,76 @@
+{
+ "daily": 50,
+ "max_sent": 2000,
+ "rows": [
+  {
+   "rule": "design: lower bound < 0.5% at n >= 300",
+   "true_rate": 0.0025,
+   "runs": 2000,
+   "paused_share": 1.0,
+   "median_sends_to_pause": 300
+  },
+  {
+   "rule": "design: lower bound < 0.5% at n >= 300",
+   "true_rate": 0.005,
+   "runs": 2000,
+   "paused_share": 0.999,
+   "median_sends_to_pause": 300
+  },
+  {
+   "rule": "design: lower bound < 0.5% at n >= 300",
+   "true_rate": 0.01,
+   "runs": 2000,
+   "paused_share": 0.829,
+   "median_sends_to_pause": 300
+  },
+  {
+   "rule": "design: lower bound < 0.5% at n >= 300",
+   "true_rate": 0.02,
+   "runs": 2000,
+   "paused_share": 0.219,
+   "median_sends_to_pause": 300
+  },
+  {
+   "rule": "design: lower bound < 0.5% at n >= 300",
+   "true_rate": 0.03,
+   "runs": 2000,
+   "paused_share": 0.031,
+   "median_sends_to_pause": 300
+  },
+  {
+   "rule": "upper bound < 1% at n >= 100",
+   "true_rate": 0.0025,
+   "runs": 2000,
+   "paused_share": 0.996,
+   "median_sends_to_pause": 600
+  },
+  {
+   "rule": "upper bound < 1% at n >= 100",
+   "true_rate": 0.005,
+   "runs": 2000,
+   "paused_share": 0.781,
+   "median_sends_to_pause": 900
+  },
+  {
+   "rule": "upper bound < 1% at n >= 100",
+   "true_rate": 0.01,
+   "runs": 2000,
+   "paused_share": 0.076,
+   "median_sends_to_pause": 900
+  },
+  {
+   "rule": "upper bound < 1% at n >= 100",
+   "true_rate": 0.02,
+   "runs": 2000,
+   "paused_share": 0.001,
+   "median_sends_to_pause": 400
+  },
+  {
+   "rule": "upper bound < 1% at n >= 100",
+   "true_rate": 0.03,
+   "runs": 2000,
+   "paused_share": 0.0,
+   "median_sends_to_pause": null
+  }
+ ]
+}

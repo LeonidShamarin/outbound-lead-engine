@@ -159,6 +159,32 @@ TONE: direct, concrete, peer to peer. Confident, not pushy. Show 60 seconds of h
 approach_a and approach_b: one line each describing the angle of that variant."""
 
 
+class TemplateWriter:
+    """A deterministic, non-LLM writer for bulk simulation runs.
+
+    It fills a fixed template from the same prompt the LLM gets, so it goes through
+    the same validator and the same code path. Emails it writes are plain on
+    purpose; LLM email quality is measured separately (eval/results/copy-*.json).
+    """
+
+    def complete(self, *, model: str, system: str, user: str, schema_name: str, schema: dict,
+                 temperature: float = 0.0):
+        from leadengine.llm import Completion
+
+        company = re.search(r"Company: (.+?) \(", user).group(1)
+        variables = json.loads(user.split("Variables (use the most specific one or two):\n", 1)[1]
+                               .rsplit("\n\nWrite the email.", 1)[0])
+        fact = next(iter(variables.values()), "")
+        return Completion(json.dumps({
+            "subject": "a question about pipeline",
+            "body_a": f"Saw that {company} {fact}.\n\n{BRAND['company']} shows which channel produced which "
+                      "pipeline.\n\nIs that on your radar this quarter?",
+            "body_b": f"Question: after {company} {fact}, who owns channel attribution?\n\n"
+                      f"{BRAND['company']} answers that without a spreadsheet.\n\nWorth comparing notes?",
+            "approach_a": "observation", "approach_b": "question",
+        }), 0, 0)
+
+
 def copy_user_prompt(ctx: LeadContext) -> str:
     return (
         f"Theory:\n  Name: {ctx.theory_name}\n  Hypothesis: {ctx.hypothesis}\n\n"

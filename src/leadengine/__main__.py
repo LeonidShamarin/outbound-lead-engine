@@ -85,6 +85,73 @@ def _eval(args: argparse.Namespace) -> None:
     print(json.dumps(s, indent=1, ensure_ascii=False))
 
 
+def _killswitch_mc(args: argparse.Namespace) -> None:
+    from leadengine.evaluate import _save
+    from leadengine.killswitch import DESIGN_RULE, UPPER_RULE, simulate_rule
+
+    rows = [simulate_rule(rule, rate, runs=args.runs, daily=args.daily, max_sent=args.max_sent)
+            for rule in (DESIGN_RULE, UPPER_RULE) for rate in (0.0025, 0.005, 0.01, 0.02, 0.03)]
+    for r in rows:
+        print(f"{r['rule']:<42} true {r['true_rate']:.2%}  paused {r['paused_share']:>6.1%}  "
+              f"median sends to pause {r['median_sends_to_pause']}")
+    _save("killswitch-montecarlo.json", {"daily": args.daily, "max_sent": args.max_sent, "rows": rows})
+
+
+def _simulate(args: argparse.Namespace) -> None:
+    import secrets as pysecrets
+
+    from leadengine.campaign import drain_copy, keyword_classifier, llm_classifier, run_simulation
+    from leadengine.copywriter import TemplateWriter
+    from leadengine.evaluate import _save
+    from leadengine.killswitch import DESIGN_RULE, UPPER_RULE
+    from leadengine.llm import LLMCall
+    from leadengine.simulator import Simulator
+    from leadengine.theorygen import propose
+
+    log: list[LLMCall] = []
+    llm = _groq(args) if (args.classifier == "llm" or args.propose) else None
+    classify = llm_classifier(llm, args.reply_model, log) if args.classifier == "llm" else keyword_classifier()
+    rule = DESIGN_RULE if args.rule == "design" else UPPER_RULE
+    sim = Simulator(secret=pysecrets.token_hex(16), seed=args.seed)
+    with db.connect() as conn:
+        drafted = drain_copy(conn, TemplateWriter(), "template")
+        res = run_simulation(conn, sim, classify, days=args.days, writer=TemplateWriter(), rule=rule,
+                             mailboxes=args.mailboxes, daily_limit=args.daily_limit)
+        theories = conn.execute(
+            """SELECT s.name, s.status, s.sent, s.replied, s.positive, s.bounced, s.unsubscribed
+                 FROM theory_stats s ORDER BY s.name""").fetchall()
+        got = dict(conn.execute("SELECT external_id, reply_class FROM events WHERE type = 'reply'").fetchall())
+        how = dict(conn.execute("SELECT payload->>'classifier', count(*) FROM events WHERE type = 'reply' "
+                                "GROUP BY 1").fetchall())
+        rejected = conn.execute("SELECT count(*) FROM webhook_rejections").fetchone()[0]
+        proposals = propose(conn, llm, args.theory_model, log) if args.propose else []
+    from leadengine.killswitch import wilson
+
+    intended = sim.intended_class
+    agree = sum(got.get(k) == v for k, v in intended.items())
+    wrong = [{"intended": v, "got": got.get(k)} for k, v in intended.items() if got.get(k) != v]
+    table = []
+    for name, status, sent, replied, positive, bounced, unsub in theories:
+        lo, hi = wilson(positive, sent)
+        table.append({"theory": name, "status": status, "true_positive_rate": sim.true_rates.get(name),
+                      "sent": sent, "replied": replied, "positive": positive, "bounced": bounced,
+                      "unsubscribed": unsub, "observed_rate": round(positive / sent, 4) if sent else None,
+                      "wilson": [round(lo, 4), round(hi, 4)], "paused_on_day": res.paused_on_day.get(name)})
+    summary = {
+        "rule": rule.name, "days": args.days, "drafted_before": drafted,
+        "sent_total": sum(d.queued for d in res.days), "webhooks": sum(d.events for d in res.days),
+        "webhook_rejections": rejected, "duplicates": sum(d.duplicates for d in res.days),
+        "theories": table,
+        "classifier": {"mode": args.classifier, "replies": len(intended), "agree_with_simulator": agree,
+                       "accuracy": round(agree / max(len(intended), 1), 3), "how": how, "mistakes": wrong[:20],
+                       "llm_cost_usd": round(sum(c.cost_usd for c in log if c.step == "reply"), 6)},
+        "proposed_theories": proposals,
+        "theory_llm_cost_usd": round(sum(c.cost_usd for c in log if c.step == "theory"), 6),
+    }
+    print(json.dumps(summary, indent=1))
+    _save(f"simulation-{args.rule}.json", {"summary": summary, "days": [d.__dict__ for d in res.days]})
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="leadengine")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -126,6 +193,23 @@ def main(argv: list[str] | None = None) -> int:
             ev.add_argument("--world", type=Path, default=Path("data/world.json"))
             ev.add_argument("--n", type=int, default=60)
 
+    mc = sub.add_parser("killswitch-mc", help="Monte Carlo: how often each pause rule stops a theory")
+    mc.add_argument("--runs", type=int, default=2000)
+    mc.add_argument("--daily", type=int, default=50)
+    mc.add_argument("--max-sent", type=int, default=2000)
+
+    sm = sub.add_parser("simulate", help="send copy-ready leads to the simulator for N days")
+    sm.add_argument("--days", type=int, default=30)
+    sm.add_argument("--rule", choices=("upper", "design"), default="upper")
+    sm.add_argument("--classifier", choices=("llm", "keywords"), default="keywords")
+    sm.add_argument("--reply-model", default="openai/gpt-oss-20b")
+    sm.add_argument("--theory-model", default="openai/gpt-oss-120b")
+    sm.add_argument("--propose", action="store_true", help="ask the LLM for 3 new draft theories at the end")
+    sm.add_argument("--mailboxes", type=int, default=5)
+    sm.add_argument("--daily-limit", type=int, default=30)
+    sm.add_argument("--seed", type=int, default=0)
+    sm.add_argument("--key-file")
+
     args = parser.parse_args(argv)
 
     if args.command == "migrate":
@@ -149,6 +233,10 @@ def main(argv: list[str] | None = None) -> int:
         _prepare(args)
     elif args.command in ("eval-replies", "eval-scoring"):
         _eval(args)
+    elif args.command == "killswitch-mc":
+        _killswitch_mc(args)
+    elif args.command == "simulate":
+        _simulate(args)
     return 0
 
 

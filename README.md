@@ -12,9 +12,98 @@ simulator. No real email is sent and no real person's data is processed. The
 LinkedIn Sales Navigator module from the original design stays documentation only:
 automating it breaks LinkedIn's terms and gets accounts banned.
 
-> Status: **stage 3 of 6** (schema, synthetic data, mock providers, enrichment
-> cascade, scoring, theories, LLM-written emails, reply classification). Sending,
-> dashboard and deployment are next; see [Roadmap](#roadmap).
+> Status: **stage 4 of 6** (schema, synthetic data, mock providers, enrichment
+> cascade, scoring, theories, LLM-written emails, reply classification, sending
+> simulator, signed webhook, kill switch, theory generator). Dashboard and
+> deployment are next; see [Roadmap](#roadmap).
+
+## Stage 4: sending, events, and killing bad theories
+
+Nothing is sent to a real inbox: a simulator stands in for the sending provider.
+Each theory has a hidden true positive-reply rate the pipeline never sees; the
+kill switch has to find the bad one from events alone. Events arrive as signed
+webhooks through the same handler a real provider would call.
+
+### The design's kill switch pauses good theories
+
+The design paused a theory when the Wilson **lower** bound of its positive reply
+rate was below 0.5% after 300 sends. A lower bound under the threshold means "we
+cannot rule out that it is bad", not "it is bad". Here a theory is paused when the
+**upper** bound is below 1%: we are 95% sure it is worse than 1%.
+
+Monte Carlo, 2000 runs per cell, 50 sends a day, checked daily, up to 2000 sends
+(`python -m leadengine killswitch-mc`):
+
+| true positive rate | design: paused | design: sends at pause | here: paused | here: sends at pause |
+|---|---|---|---|---|
+| 0.25% (bad) | 100% | 300 | 99.6% | 600 |
+| 0.5% (bad) | 99.9% | 300 | 78.1% | 900 |
+| 1% (2x the design's threshold) | **82.9%** | 300 | 7.6% | 900 |
+| 2% (4x) | **21.9%** | 300 | 0.1% | 400 |
+| 3% (6x) | 3.1% | 300 | 0% | |
+
+The design's rule kills most theories that work twice as well as its own threshold
+and one in five that work four times as well. The upper-bound rule almost never
+pauses a good theory and pays for it with sends: a 0.25% theory runs to 600 emails
+instead of 300. The 7.6% at exactly 1% is above the nominal 2.5% because the rule is
+checked every day, not once; a sequential test would fix that.
+
+### The same thing in a 30-day simulated campaign
+
+1500 companies, 3 mailboxes of 20 emails a day, replies classified by
+`gpt-oss-20b`, run twice on the same world with only the rule changed. The simulator
+seeds each recipient's behaviour by their email, so both runs see the same person
+answer the same way.
+
+| | upper bound (here) | lower bound (design) |
+|---|---|---|
+| bad theory (true 0.3%) | paused day 15, after 594 sends, 1 positive | paused day 8, after 321 sends, 1 positive |
+| good theory (true 1.2%) | kept, 359 sends, 3 positive | **paused day 11**, after 307 sends, 2 positive |
+| best theory (true 3%) | kept, 102 sends, 4 positive | kept, 102 sends, 4 positive |
+| emails sent | 1055 | 730 |
+| positive replies | 8 | 7 |
+| webhooks rejected | 0 of 1615 | 0 of 1123 |
+| replies classified as the simulator meant | 82 of 82 | 54 of 54 |
+
+Both effects are visible: the design's rule stopped the bad theory 273 emails
+sooner, and stopped the good one too. After that second pause only the 3% theory
+was left: 511 unsent leads were released, almost none fitted it, and sending stopped
+on day 12 while the upper-bound run kept sending until day 17. In this
+world the good theory had few leads left, so the false kill cost one positive reply;
+with a larger pool it would cost the pool. The reply classifier met replies it had
+never seen (the simulator has its own text bank) and matched all 136, for $0.0041
+per 82.
+
+When a theory is paused, its leads that have not been handed to the sender go back
+to theory assignment. In the upper-bound run 352 were released and 26 fitted
+another theory; the rest went to `cold_reserve` with the reason.
+
+### Webhook
+
+`X-Signature: t=<unix>,v1=<HMAC-SHA256 of "t." + raw body>`. Differences from the
+design's verifier, each with a test:
+
+| in the design | here |
+|---|---|
+| on a bad signature it threw `Invalid HMAC signature, got X, expected Y`: whoever sent a forged request got the right signature back | the error says only which check failed |
+| signed `JSON.stringify(parsed body)`, so a change in key order or whitespace broke valid webhooks | signs the raw bytes received |
+| no timestamp: a captured webhook stayed valid forever | timestamp inside the signed bytes, 5-minute window, duplicates dropped by event id |
+| any reply moved the lead to `replied`, including out-of-office | an out-of-office leaves the lead in `sent`; a reply after an unsubscribe or bounce does not undo it |
+| pausing moved `queued` leads to another theory, although the sender already had their email | only leads not yet handed over move |
+| "never pause the last active theory" was checked after the SQL had already paused it | checked before; the theory stays active |
+
+Rejected requests are recorded with the reason and a hash of the body, never the
+body itself.
+
+### Theory generator
+
+At the end of the simulation, `gpt-oss-120b` read the per-segment reply rates and
+proposed three theories ("recent tech stack overhaul", "post-funding board
+scrutiny", "accelerated hiring sprint") for $0.0004. The validator accepts only
+signals the pipeline can fetch (the design allowed LinkedIn activity, which this
+project does not automate), segment values that exist, and new names. Proposals are
+stored as `draft`: a theory decides who gets emailed, so switching one on stays a
+human decision.
 
 ## Stage 3: scoring, theories, emails, replies
 
@@ -277,6 +366,8 @@ python -m leadengine enrich --target 3            # add --rate-429 0.1 etc. to i
 python -m leadengine prepare --copy-limit 30 --dump   # needs GROQ_API_KEY
 python -m leadengine eval-replies                  # 40 labelled replies against the LLM
 python -m leadengine eval-scoring --n 60           # LLM score vs the rubric
+python -m leadengine killswitch-mc                 # pause rules, Monte Carlo
+python -m leadengine simulate --days 30 --classifier llm --propose
 ```
 
 Live runs on this machine go through `.\scripts\run_live_capped.ps1 -WithDb -Command '...'`:
@@ -294,7 +385,7 @@ are removed afterwards.
 .\scripts\run_tests_capped.ps1
 ```
 
-Current result: `125 passed`.
+Current result: `147 passed`.
 
 If an antivirus on your machine intercepts HTTPS (pip in the image fails with
 `CERTIFICATE_VERIFY_FAILED`), run `.\scripts\export_local_ca.ps1` once. It exports
@@ -307,6 +398,6 @@ not stored in the image.
 1. **Schema, migrations, synthetic data** (done)
 2. **Mock providers with real response shapes, 429s and pagination; the enrichment cascade** (done)
 3. **Scoring, theories and copy through an LLM with schema-validated output, fallbacks and evals** (done)
-4. Sending simulator, HMAC-signed event webhook with idempotency, Wilson-bound kill switch, dead letter
+4. **Sending simulator, HMAC-signed event webhook with idempotency, Wilson-bound kill switch, theory generator** (done)
 5. Dashboard (Next.js) and deployment: Vercel, Neon, scheduled cycles in GitHub Actions
 6. n8n workflows orchestrating the same steps, demo recording
