@@ -1,0 +1,39 @@
+name: daily cycle
+
+# One simulated day per run against the deployed database: score and theory
+# assignment for new leads, up to 20 LLM-written emails, the day's sends, and the
+# simulator's events delivered over HTTPS to the deployed webhook.
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+# Two runs never overlap; the queue claims (SKIP LOCKED) would cope, but the
+# simulator's outbox is read and rewritten per run.
+concurrency:
+  group: daily-cycle
+  cancel-in-progress: false
+
+jobs:
+  cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      - name: bootstrap (idempotent) and one day
+        env:
+          PYTHONPATH: src
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+          WEBHOOK_URL: ${{ vars.WEBHOOK_URL }}
+        run: |
+          ulimit -v 2097152
+          python -m leadengine bootstrap
+          python -m leadengine cycle --llm --copy-limit 20

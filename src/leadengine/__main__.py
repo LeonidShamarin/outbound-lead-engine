@@ -152,6 +152,46 @@ def _simulate(args: argparse.Namespace) -> None:
     _save(f"simulation-{args.rule}.json", {"summary": summary, "days": [d.__dict__ for d in res.days]})
 
 
+def _bootstrap(args: argparse.Namespace) -> None:
+    """migrate + generate + seed + enrich, skipping what is already there."""
+    from leadengine.enrich import mock_clients, run_until_done
+    from leadengine.providers.mock import MockProviders
+
+    world = build_world(seed=args.seed, n_companies=args.companies)
+    with db.connect() as conn:
+        applied = db.migrate(conn)
+        print(f"migrations applied: {len(applied)}")
+        if conn.execute("SELECT count(*) FROM companies").fetchone()[0]:
+            print("companies already loaded, skipping seed and enrichment")
+            return
+        conn.commit()
+        r = load_intake(conn, world)
+        s = run_until_done(conn, mock_clients(MockProviders(world), sleep=lambda _: None))
+    print(f"seeded {r.inserted} companies; enriched {s.enriched}, {s.leads} contacts, ${s.cost_usd:.2f}")
+
+
+def _cycle(args: argparse.Namespace) -> None:
+    import os
+
+    from leadengine.campaign import keyword_classifier, llm_classifier, run_scheduled_day
+    from leadengine.copywriter import TemplateWriter
+
+    secret = os.environ.get("WEBHOOK_SECRET")
+    if not secret:
+        raise SystemExit("WEBHOOK_SECRET is not set")
+    llm = _groq(args) if args.llm else None
+    writer, model = (llm, args.copy_model) if llm else (TemplateWriter(), "template")
+    classify = llm_classifier(llm, "openai/gpt-oss-20b", []) if llm else keyword_classifier()
+    with db.connect() as conn:
+        r = run_scheduled_day(conn, secret=secret, classify=classify, writer=writer, writer_model=model,
+                              copy_limit=args.copy_limit, webhook_url=args.webhook_url or os.environ.get("WEBHOOK_URL"))
+    print(f"day {r.day}: drafted {r.drafted}, queued {r.queued}, delivered {r.delivered} {r.statuses}, "
+          f"paused {r.paused or 'none'}")
+    bad = {k: v for k, v in r.statuses.items() if k != 200}
+    if bad:
+        raise SystemExit(f"webhook answered non-200: {bad}")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="leadengine")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -210,6 +250,17 @@ def main(argv: list[str] | None = None) -> int:
     sm.add_argument("--seed", type=int, default=0)
     sm.add_argument("--key-file")
 
+    boot = sub.add_parser("bootstrap", help="migrate, seed and enrich a fresh database (idempotent)")
+    boot.add_argument("--seed", type=int, default=42)
+    boot.add_argument("--companies", type=int, default=250)
+
+    cyc = sub.add_parser("cycle", help="one scheduled run: prepare, send, deliver events, judge theories")
+    cyc.add_argument("--copy-limit", type=int, default=20)
+    cyc.add_argument("--copy-model", default="openai/gpt-oss-120b")
+    cyc.add_argument("--llm", action="store_true", help="write emails and classify replies with Groq")
+    cyc.add_argument("--webhook-url", help="deliver events over HTTP (default: $WEBHOOK_URL, else in-process)")
+    cyc.add_argument("--key-file")
+
     args = parser.parse_args(argv)
 
     if args.command == "migrate":
@@ -237,6 +288,10 @@ def main(argv: list[str] | None = None) -> int:
         _killswitch_mc(args)
     elif args.command == "simulate":
         _simulate(args)
+    elif args.command == "bootstrap":
+        _bootstrap(args)
+    elif args.command == "cycle":
+        _cycle(args)
     return 0
 
 

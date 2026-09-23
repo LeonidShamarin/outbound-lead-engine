@@ -16,7 +16,7 @@ import hashlib
 import json
 import random
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from leadengine.sending import Queued
 from leadengine.webhook import sign
@@ -78,6 +78,7 @@ class Simulator:
     true_rates: dict[str, float] = field(default_factory=lambda: dict(DEFAULT_TRUE_RATES))
     seed: int = 0
     start: datetime = datetime(2026, 9, 1, 9, 0)
+    real_time: bool = False  # scheduled runs stamp events with the actual time
     pending: list[_Pending] = field(default_factory=list)
     intended_class: dict[str, str] = field(default_factory=dict)  # event id -> class the simulator meant
 
@@ -127,7 +128,7 @@ class Simulator:
         due = [p for p in self.pending if p.due_day <= day]
         self.pending = [p for p in self.pending if p.due_day > day]
         out = []
-        ts = self.start + timedelta(days=day)
+        ts = datetime.now(timezone.utc).replace(tzinfo=None) if self.real_time else self.start + timedelta(days=day)
         for p in due:
             body = json.dumps({**p.event, "occurred_at": ts.isoformat() + "Z"}).encode()
             out.append((sign(self.secret, body), body))

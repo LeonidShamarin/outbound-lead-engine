@@ -1,10 +1,10 @@
 {
  "summary": {
   "rule": "upper bound < 1% at n >= 100",
-  "days": 30,
-  "drafted_before": 1381,
-  "sent_total": 1055,
-  "webhooks": 1615,
+  "days": 20,
+  "drafted_before": 203,
+  "sent_total": 203,
+  "webhooks": 307,
   "webhook_rejections": 0,
   "duplicates": 0,
   "theories": [
@@ -12,74 +12,107 @@
     "theory": "fresh funding, hiring for pipeline",
     "status": "active",
     "true_positive_rate": 0.03,
-    "sent": 102,
-    "replied": 7,
-    "positive": 4,
-    "bounced": 3,
+    "sent": 8,
+    "replied": 0,
+    "positive": 0,
+    "bounced": 0,
     "unsubscribed": 0,
-    "observed_rate": 0.0392,
+    "observed_rate": 0.0,
     "wilson": [
-     0.0154,
-     0.0965
+     0.0,
+     0.3244
     ],
     "paused_on_day": null
    },
    {
     "theory": "new office, new market",
-    "status": "paused",
+    "status": "active",
     "true_positive_rate": 0.003,
-    "sent": 594,
-    "replied": 25,
-    "positive": 1,
-    "bounced": 5,
-    "unsubscribed": 5,
-    "observed_rate": 0.0017,
+    "sent": 136,
+    "replied": 10,
+    "positive": 2,
+    "bounced": 3,
+    "unsubscribed": 1,
+    "observed_rate": 0.0147,
     "wilson": [
-     0.0003,
-     0.0095
+     0.004,
+     0.052
     ],
-    "paused_on_day": 15
+    "paused_on_day": null
    },
    {
     "theory": "new tool, broken attribution",
     "status": "active",
     "true_positive_rate": 0.012,
-    "sent": 359,
-    "replied": 17,
-    "positive": 3,
-    "bounced": 4,
-    "unsubscribed": 1,
-    "observed_rate": 0.0084,
+    "sent": 59,
+    "replied": 2,
+    "positive": 0,
+    "bounced": 0,
+    "unsubscribed": 0,
+    "observed_rate": 0.0,
     "wilson": [
-     0.0028,
-     0.0243
+     0.0,
+     0.0611
     ],
     "paused_on_day": null
    }
   ],
   "classifier": {
-   "mode": "llm",
-   "replies": 82,
-   "agree_with_simulator": 82,
-   "accuracy": 1.0,
+   "mode": "keywords",
+   "replies": 13,
+   "agree_with_simulator": 4,
+   "accuracy": 0.308,
    "how": {
-    "llm": 82
+    "keywords": 13
    },
-   "mistakes": [],
-   "llm_cost_usd": 0.004115
+   "mistakes": [
+    {
+     "intended": "ooo",
+     "got": "neutral"
+    },
+    {
+     "intended": "ooo",
+     "got": "neutral"
+    },
+    {
+     "intended": "referral",
+     "got": "neutral"
+    },
+    {
+     "intended": "negative",
+     "got": "neutral"
+    },
+    {
+     "intended": "negative",
+     "got": "neutral"
+    },
+    {
+     "intended": "negative",
+     "got": "neutral"
+    },
+    {
+     "intended": "ooo",
+     "got": "neutral"
+    },
+    {
+     "intended": "positive",
+     "got": "neutral"
+    },
+    {
+     "intended": "negative",
+     "got": "neutral"
+    }
+   ],
+   "llm_cost_usd": 0
   },
-  "proposed_theories": [
-   "recent tech stack overhaul",
-   "post‑funding board scrutiny",
-   "accelerated hiring sprint"
-  ],
-  "theory_llm_cost_usd": 0.000405
+  "proposed_theories": [],
+  "theory_llm_cost_usd": 0
  },
  "days": [
   {
    "day": 0,
    "queued": 60,
-   "events": 73,
+   "events": 72,
    "rejected": 0,
    "duplicates": 0,
    "paused": [],
@@ -88,7 +121,7 @@
   {
    "day": 1,
    "queued": 60,
-   "events": 76,
+   "events": 78,
    "rejected": 0,
    "duplicates": 0,
    "paused": [],
@@ -97,7 +130,7 @@
   {
    "day": 2,
    "queued": 60,
-   "events": 87,
+   "events": 86,
    "rejected": 0,
    "duplicates": 0,
    "paused": [],
@@ -105,8 +138,8 @@
   },
   {
    "day": 3,
-   "queued": 60,
-   "events": 96,
+   "queued": 23,
+   "events": 49,
    "rejected": 0,
    "duplicates": 0,
    "paused": [],
@@ -114,8 +147,8 @@
   },
   {
    "day": 4,
-   "queued": 60,
-   "events": 89,
+   "queued": 0,
+   "events": 16,
    "rejected": 0,
    "duplicates": 0,
    "paused": [],
@@ -123,143 +156,6 @@
   },
   {
    "day": 5,
-   "queued": 60,
-   "events": 88,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 6,
-   "queued": 60,
-   "events": 97,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 7,
-   "queued": 60,
-   "events": 93,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 8,
-   "queued": 60,
-   "events": 95,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 9,
-   "queued": 60,
-   "events": 88,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 10,
-   "queued": 60,
-   "events": 93,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 11,
-   "queued": 60,
-   "events": 95,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 12,
-   "queued": 60,
-   "events": 90,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 13,
-   "queued": 60,
-   "events": 99,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 14,
-   "queued": 60,
-   "events": 89,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 15,
-   "queued": 60,
-   "events": 84,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [
-    "new office, new market"
-   ],
-   "released": 352
-  },
-  {
-   "day": 16,
-   "queued": 60,
-   "events": 91,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 17,
-   "queued": 35,
-   "events": 67,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 18,
-   "queued": 0,
-   "events": 13,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 19,
-   "queued": 0,
-   "events": 7,
-   "rejected": 0,
-   "duplicates": 0,
-   "paused": [],
-   "released": 0
-  },
-  {
-   "day": 20,
    "queued": 0,
    "events": 5,
    "rejected": 0,
@@ -268,7 +164,16 @@
    "released": 0
   },
   {
-   "day": 21,
+   "day": 6,
+   "queued": 0,
+   "events": 1,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 7,
    "queued": 0,
    "events": 0,
    "rejected": 0,
@@ -277,7 +182,7 @@
    "released": 0
   },
   {
-   "day": 22,
+   "day": 8,
    "queued": 0,
    "events": 0,
    "rejected": 0,
@@ -286,7 +191,7 @@
    "released": 0
   },
   {
-   "day": 23,
+   "day": 9,
    "queued": 0,
    "events": 0,
    "rejected": 0,
@@ -295,7 +200,7 @@
    "released": 0
   },
   {
-   "day": 24,
+   "day": 10,
    "queued": 0,
    "events": 0,
    "rejected": 0,
@@ -304,7 +209,7 @@
    "released": 0
   },
   {
-   "day": 25,
+   "day": 11,
    "queued": 0,
    "events": 0,
    "rejected": 0,
@@ -313,7 +218,7 @@
    "released": 0
   },
   {
-   "day": 26,
+   "day": 12,
    "queued": 0,
    "events": 0,
    "rejected": 0,
@@ -322,7 +227,7 @@
    "released": 0
   },
   {
-   "day": 27,
+   "day": 13,
    "queued": 0,
    "events": 0,
    "rejected": 0,
@@ -331,7 +236,7 @@
    "released": 0
   },
   {
-   "day": 28,
+   "day": 14,
    "queued": 0,
    "events": 0,
    "rejected": 0,
@@ -340,7 +245,43 @@
    "released": 0
   },
   {
-   "day": 29,
+   "day": 15,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 16,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 17,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 18,
+   "queued": 0,
+   "events": 0,
+   "rejected": 0,
+   "duplicates": 0,
+   "paused": [],
+   "released": 0
+  },
+  {
+   "day": 19,
    "queued": 0,
    "events": 0,
    "rejected": 0,
