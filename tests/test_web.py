@@ -29,11 +29,13 @@ def test_dashboard_renders_on_an_empty_database(client) -> None:
     assert "Outbound Lead Engine" in r.text and "nothing yet" in r.text
 
 
-def test_health(client, monkeypatch) -> None:
+def test_health_and_dashboard_without_a_database(client, monkeypatch) -> None:
     assert client.get("/health").json() == {"ok": True, "db": True}
     monkeypatch.setenv("DATABASE_URL", "postgresql://x:y@127.0.0.1:1/x")
     r = client.get("/health")
     assert r.status_code == 503 and r.json()["db"] is False
+    page = client.get("/")
+    assert page.status_code == 503 and "not reachable" in page.text
 
 
 def test_data_is_escaped_in_html(client, conn) -> None:

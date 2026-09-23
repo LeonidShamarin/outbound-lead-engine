@@ -102,8 +102,12 @@ def _table(cols: list[str], rows: list[tuple], empty: str = "nothing yet") -> st
 
 @app.get("/", response_class=HTMLResponse)
 def dashboard() -> HTMLResponse:
-    with _db() as conn:
-        parts = {k: _rows(conn, q) for k, q in QUERIES.items()}
+    try:
+        with _db() as conn:
+            parts = {k: _rows(conn, q) for k, q in QUERIES.items()}
+    except (psycopg.Error, KeyError) as e:
+        note = f"<p class='muted'>The database is not reachable right now ({html.escape(type(e).__name__)}).</p>"
+        return HTMLResponse(PAGE.format(tiles="", body=note), status_code=503)
     fcols, frows = parts["funnel"]
     funnel = dict(zip(fcols, frows[0])) if frows else {}
     tiles = "".join(
