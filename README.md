@@ -13,9 +13,9 @@ LinkedIn Sales Navigator module from the original design stays documentation onl
 automating it breaks LinkedIn's terms and gets accounts banned.
 
 **Live:** [outbound-lead-engine.vercel.app](https://outbound-lead-engine.vercel.app)
-(dashboard), fed once a day by a scheduled GitHub Actions run: new emails written by
-an LLM, the simulator's events delivered over HTTPS to the signed webhook, the kill
-switch applied. All six stages are done; see [Roadmap](#roadmap).
+(dashboard), fed by a GitHub Actions run started on demand, one simulated day per
+run: new emails written by an LLM, the simulator's events delivered over HTTPS to the
+signed webhook, the kill switch applied. All six stages are done; see [Roadmap](#roadmap).
 
 ![Dashboard after 20 simulated days](docs/dashboard.jpg)
 
@@ -26,7 +26,7 @@ database.*
 ## How it runs in production
 
 ```
-GitHub Actions (daily cron)          n8n (optional, same thing)
+GitHub Actions (on demand)           n8n (optional, same thing)
   python -m leadengine cycle           POST /api/cycle, HMAC-signed
           │                                     │
           └────────────► one simulated day ◄────┘
@@ -41,8 +41,8 @@ GitHub Actions (daily cron)          n8n (optional, same thing)
 | piece | where | notes |
 |---|---|---|
 | app (dashboard, webhook, cycle trigger) | Vercel, Python 3.12, FastAPI | `app.py` → `src/leadengine/web.py`; `/health`, `/api/events`, `/api/cycle`, `/api/summary` |
-| database | Neon Postgres, `us-east-1`, next to Vercel's default region | migrations run by the scheduled job; the app uses the pooled URL |
-| schedule | GitHub Actions `daily cycle` | `bootstrap` (idempotent) then `cycle --llm --copy-limit 20` |
+| database | Neon Postgres, `us-east-1`, next to Vercel's default region | migrations run by the cycle job; the app uses the pooled URL |
+| cycle | GitHub Actions `daily cycle`, started by hand | `bootstrap` (idempotent) then `cycle --llm --copy-limit 20` |
 | tests | GitHub Actions `tests` on every push | Postgres service container, memory-capped |
 | orchestration | [`n8n/`](n8n) | two workflows, verified in n8n 2.16.1 |
 
@@ -85,7 +85,7 @@ read by the app. Three were not carried over: the two about the LinkedIn account
 pool (that module stays documentation) and "pipeline value", which needs an
 average deal size the data does not have.
 
-The first scheduled runs on the live stack: day 0 wrote 19 emails with Groq and
+The first runs on the live stack: day 0 wrote 19 emails with Groq and
 delivered 24 events, day 1 wrote 20 and delivered 28; every event was answered 200.
 Of 20 leads on day 0, one email failed validation twice and went back to the queue,
 as designed.
@@ -483,5 +483,5 @@ not stored in the image.
 2. **Mock providers with real response shapes, 429s and pagination; the enrichment cascade** (done)
 3. **Scoring, theories and copy through an LLM with schema-validated output, fallbacks and evals** (done)
 4. **Sending simulator, HMAC-signed event webhook with idempotency, Wilson-bound kill switch, theory generator** (done)
-5. **Dashboard and deployment: Vercel, Neon, scheduled cycles in GitHub Actions** (done; the dashboard is FastAPI, not Next.js, because Vercel now runs a Python app as one function and mixing in Next.js needs a second build)
+5. **Dashboard and deployment: Vercel, Neon, cycles in GitHub Actions** (done; the dashboard is FastAPI, not Next.js, because Vercel now runs a Python app as one function and mixing in Next.js needs a second build)
 6. **n8n workflows orchestrating the same steps** (done)

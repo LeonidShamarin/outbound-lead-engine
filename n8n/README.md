@@ -12,9 +12,9 @@ of the app (see "Verified" below).
 | `daily-cycle.json` | Every day at 07:00: builds `{"copy_limit": 20}`, signs it with HMAC-SHA256 (the Crypto node, secret from a credential), POSTs it to `/api/cycle`. A 409 means another cycle (GitHub Actions) is already running and is not an error; any other non-200, or a webhook event the server rejected, fails the execution. |
 | `positive-digest.json` | Every day at 09:00: reads `/api/summary`, and if there are positive replies from the last 2 days, posts a digest to a Slack or Discord incoming webhook (`text` and `content` are both sent). No new replies, no message. |
 
-Both are imported inactive. GitHub Actions already runs the daily cycle; turn the
-n8n one on only if you switch the Actions schedule off, otherwise the second run of
-the day just gets a 409.
+Both are imported inactive. The GitHub Actions cycle is started by hand; turning the
+n8n one on is the way to get a cycle every day. If both start at once, the second
+gets a 409.
 
 ## Import
 

@@ -3,9 +3,9 @@ name: daily cycle
 # One simulated day per run against the deployed database: score and theory
 # assignment for new leads, up to 20 LLM-written emails, the day's sends, and the
 # simulator's events delivered over HTTPS to the deployed webhook.
+# Started by hand (Actions → Run workflow, or `gh workflow run cycle.yml`): a demo
+# does not need a new simulated day every calendar day.
 on:
-  schedule:
-    - cron: "17 6 * * *"
   workflow_dispatch:
 
 # Two runs never overlap; the queue claims (SKIP LOCKED) would cope, but the
