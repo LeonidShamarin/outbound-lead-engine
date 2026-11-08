@@ -31,12 +31,13 @@ def _db() -> Iterator[psycopg.Connection]:
 
 def _classifier():
     from leadengine.campaign import keyword_classifier, llm_classifier
-    from leadengine.llm import GroqClient
+    from leadengine.llm import LLMError, build_llm
 
-    key = os.environ.get("GROQ_API_KEY")
-    if not key:
+    try:
+        llm = build_llm("groq")
+    except LLMError:
         return keyword_classifier()
-    return llm_classifier(GroqClient(key), os.environ.get("REPLY_MODEL", "openai/gpt-oss-20b"), [])
+    return llm_classifier(llm, os.environ.get("REPLY_MODEL", "openai/gpt-oss-20b"), [])
 
 
 PUBLIC_URL = os.environ.get("PUBLIC_URL", "https://outbound-lead-engine.vercel.app").rstrip("/")
@@ -76,7 +77,7 @@ async def cycle(request: Request) -> JSONResponse:
     an orchestrator such as n8n can trigger it without a second credential."""
     from leadengine.campaign import CycleBusy, run_scheduled_day
     from leadengine.copywriter import TemplateWriter
-    from leadengine.llm import GroqClient
+    from leadengine.llm import LLMError, build_llm
     from leadengine.webhook import WebhookRejected, verify
 
     body = await request.body()
@@ -90,8 +91,10 @@ async def cycle(request: Request) -> JSONResponse:
         copy_limit = max(0, min(int(opts.get("copy_limit", 20)), 50))
     except (ValueError, TypeError, AttributeError):
         return JSONResponse({"error": "body must be JSON like {\"copy_limit\": 20}"}, status_code=400)
-    key = os.environ.get("GROQ_API_KEY")
-    writer, model = (GroqClient(key), "openai/gpt-oss-120b") if key else (TemplateWriter(), "template")
+    try:
+        writer, model = build_llm("groq"), "openai/gpt-oss-120b"
+    except LLMError:
+        writer, model = TemplateWriter(), "template"
     try:
         with _db() as conn:
             conn.autocommit = False

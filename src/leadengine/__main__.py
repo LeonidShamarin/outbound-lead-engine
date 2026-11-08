@@ -42,12 +42,17 @@ def _enrich(args: argparse.Namespace) -> None:
 def _groq(args: argparse.Namespace):
     import os
 
-    from leadengine.llm import GroqClient, groq_key_from_file
+    from leadengine.llm import LLMError, build_llm, groq_key_from_file
 
-    key = os.environ.get("GROQ_API_KEY") or (groq_key_from_file(args.key_file) if args.key_file else None)
-    if not key:
-        raise SystemExit("set GROQ_API_KEY or pass --key-file")
-    return GroqClient(key)
+    # The chain still starts at Groq; --key-file just supplies the Groq key when
+    # it is not already in the environment. build_llm adds the fallback tiers.
+    env = dict(os.environ)
+    if not env.get("GROQ_API_KEY") and args.key_file:
+        env["GROQ_API_KEY"] = groq_key_from_file(args.key_file)
+    try:
+        return build_llm("groq", env=env)
+    except LLMError:
+        raise SystemExit("set GROQ_API_KEY (or another provider key) or pass --key-file")
 
 
 def _prepare(args: argparse.Namespace) -> None:

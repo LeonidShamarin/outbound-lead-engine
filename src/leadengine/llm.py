@@ -13,6 +13,8 @@ answer still goes through `model_validate` and the step's own validator.
 from __future__ import annotations
 
 import copy
+import json
+import os
 import re
 import time
 from collections.abc import Callable
@@ -144,6 +146,144 @@ class GroqClient:
         except (KeyError, IndexError, TypeError) as e:
             raise LLMError(f"unexpected response shape: {str(data)[:200]}") from e
         return Completion(text, int(usage.get("prompt_tokens", 0)), int(usage.get("completion_tokens", 0)))
+
+
+# --- multi-provider fallback -------------------------------------------------
+#
+# Chain order (see ~/.claude memory ai-provider-fallback-chain-pet-projects):
+#   current provider -> ai-keys.env [gemini, groq, openai, xai] -> ключі2.txt last.
+# Groq, OpenAI and xAI are natively OpenAI-compatible; Gemini exposes an
+# OpenAI-compatible endpoint. Each fallback provider ignores the caller's logical
+# model id (a Groq id like "openai/gpt-oss-120b" is meaningless to OpenAI) and
+# uses its own default below.
+PROVIDER_ENDPOINTS: dict[str, tuple[str, str]] = {
+    # provider -> (base_url, default model)
+    "groq": (GROQ_URL, "openai/gpt-oss-120b"),
+    "gemini": ("https://generativelanguage.googleapis.com/v1beta/openai", "gemini-2.5-flash"),
+    "openai": ("https://api.openai.com/v1", "gpt-4o-mini"),
+    "xai": ("https://api.x.ai/v1", "grok-2-latest"),
+}
+
+_PRIMARY_ENV = {"groq": "GROQ_API_KEY", "gemini": "GEMINI_API_KEY",
+                "openai": "OPENAI_API_KEY", "xai": "XAI_API_KEY"}
+# The four keys from D:\secrets\ai-keys.env, in file order.
+_AIKEYS_ENV = [("gemini", "GEMINI_API_KEY"), ("groq", "GROQ_API_KEY"),
+               ("openai", "OPENAI_API_KEY"), ("xai", "XAI_API_KEY")]
+# The ключі2.txt keys — tried last.
+_KLYUCHI2_ENV = [("gemini", "GEMINI_API_KEY_2"), ("gemini", "GEMINI_API_KEY_3"),
+                 ("groq", "GROQ_API_KEY_2")]
+
+
+class OpenAICompatClient:
+    """OpenAI-compatible chat client for any provider in the fallback chain.
+
+    Unlike GroqClient it asks for `response_format: json_object` and pastes the
+    schema into the system prompt, because strict `json_schema` is not supported
+    uniformly across Gemini/OpenAI/xAI. `structured()` still validates with
+    Pydantic and repairs, so a merely well-formed JSON object is enough here.
+    """
+
+    def __init__(self, provider: str, api_key: str, *, http: httpx.Client | None = None,
+                 base_url: str | None = None, model: str | None = None,
+                 policy: RetryPolicy = RetryPolicy(), sleep: Callable[[float], None] = time.sleep,
+                 max_completion_tokens: int = 2000) -> None:
+        base_default, model_default = PROVIDER_ENDPOINTS.get(provider, ("", ""))
+        self.provider = provider
+        self.api_key = api_key
+        self.http = http or httpx.Client(timeout=60.0)
+        self.base_url = (base_url or base_default).rstrip("/")
+        self.model = model or model_default
+        self.policy = policy
+        self.sleep = sleep
+        self.max_completion_tokens = max_completion_tokens
+
+    def complete(self, *, model: str, system: str, user: str, schema_name: str, schema: dict,
+                 temperature: float = 0.0) -> Completion:
+        system_with_schema = (
+            f"{system}\n\n# Output: one JSON object matching this schema "
+            f"(no prose, no markdown fence):\n{json.dumps(schema, ensure_ascii=False)}"
+        )
+        body = {
+            "model": self.model,
+            "messages": [{"role": "system", "content": system_with_schema},
+                         {"role": "user", "content": user}],
+            "temperature": temperature,
+            "max_tokens": self.max_completion_tokens,
+            "response_format": {"type": "json_object"},
+        }
+        try:
+            resp, _ = send(self.http, "POST", f"{self.base_url}/chat/completions", provider=self.provider,
+                           endpoint="chat", ledger=Ledger(), policy=self.policy, sleep=self.sleep,
+                           headers={"Authorization": f"Bearer {self.api_key}"}, json=body)
+        except ProviderError as e:
+            raise LLMError(str(e)) from e
+        data = resp.json()
+        usage = data.get("usage") or {}
+        try:
+            text = data["choices"][0]["message"]["content"] or ""
+        except (KeyError, IndexError, TypeError) as e:
+            raise LLMError(f"unexpected response shape: {str(data)[:200]}") from e
+        return Completion(text, int(usage.get("prompt_tokens", 0)), int(usage.get("completion_tokens", 0)))
+
+
+class FallbackClient:
+    """Try each provider in order; move to the next only on a request failure
+    (`LLMError`: transport, auth, provider down). A content problem is not a
+    provider's fault — it is raised by `structured()` for repair and never
+    switches provider, so a bad answer does not quietly burn the whole chain."""
+
+    def __init__(self, members: list[tuple[str, LLMClient]]) -> None:
+        if not members:
+            raise LLMError("fallback chain is empty: no provider keys configured")
+        self.members = members
+
+    def complete(self, *, model: str, system: str, user: str, schema_name: str, schema: dict,
+                 temperature: float = 0.0) -> Completion:
+        errors: list[str] = []
+        for name, client in self.members:
+            try:
+                return client.complete(model=model, system=system, user=user, schema_name=schema_name,
+                                       schema=schema, temperature=temperature)
+            except LLMError as e:
+                errors.append(f"{name}: {str(e)[:150]}")
+        raise LLMError("all providers failed -> " + " | ".join(errors))
+
+
+def _make_client(provider: str, key: str, http: httpx.Client | None = None) -> LLMClient:
+    # The primary Groq path keeps its strict-schema client; every other provider
+    # uses the portable json_object client.
+    if provider == "groq":
+        return GroqClient(key, http=http)
+    return OpenAICompatClient(provider, key, http=http)
+
+
+def build_llm(primary: str = "groq", *, env: dict | None = None,
+              http: httpx.Client | None = None) -> LLMClient:
+    """Assemble the provider fallback chain from the environment.
+
+    Order: the project's current provider first, then the four ai-keys.env keys
+    (gemini, groq, openai, xai), then the ключі2.txt keys last. Entries whose key
+    env var is unset are skipped; duplicate (provider, key) pairs collapse, so a
+    Groq-primary project does not list its own key twice. A single configured
+    provider returns a bare client, with no wrapper overhead. Raises LLMError when
+    nothing is configured."""
+    env = os.environ if env is None else env
+    ordered: list[tuple[str, str]] = [(primary, _PRIMARY_ENV[primary])]
+    ordered += _AIKEYS_ENV + _KLYUCHI2_ENV
+
+    members: list[tuple[str, LLMClient]] = []
+    seen: set[tuple[str, str]] = set()
+    for provider, var in ordered:
+        key = (env.get(var) or "").strip()
+        if not key or (provider, key) in seen:
+            continue
+        seen.add((provider, key))
+        members.append((f"{provider}:{var}", _make_client(provider, key, http=http)))
+    if not members:
+        raise LLMError("no provider keys configured (set GROQ_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY or XAI_API_KEY)")
+    if len(members) == 1:
+        return members[0][1]
+    return FallbackClient(members)
 
 
 def _pydantic_problems(e: ValidationError) -> list[str]:
