@@ -105,7 +105,7 @@ def test_openai_compat_client_shape() -> None:
     assert out.text == '{"v": 2}' and out.prompt_tokens == 7
     assert seen["url"].endswith("/v1beta/openai/chat/completions")
     assert seen["auth"] == "Bearer AQ.key"
-    assert seen["body"]["model"] == "gemini-2.5-flash"  # provider default, not the logical id
+    assert seen["body"]["model"] == "gemini-3.5-flash-lite"  # provider default, not the logical id
     assert seen["body"]["response_format"] == {"type": "json_object"}
     assert "schema" in seen["body"]["messages"][0]["content"].lower()  # schema pasted into system
 
